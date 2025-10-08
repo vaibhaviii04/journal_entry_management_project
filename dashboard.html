@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    overflow: hidden;
+}
+
+/* ===================== Dashboard Layout ===================== */
+.dashboard-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    z-index: 1;
+}
+
+.left-sidebar {
+    width: 200px;
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    color: #f7f3ee;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    z-index: 1;
+}
+
+.left-sidebar h3 { margin-top: 0; font-size: 16px; text-align: center; }
+.quote { font-size: 14px; font-style: italic; margin: 20px 0; text-align: center; }
+.mini-stats { margin-top: 30px; text-align: center; }
+.mini-stats p { margin: 5px 0; font-size: 14px; }
+
+/* ===================== Mood Tracker ===================== */
+.mood-tracker {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.mood-tracker p {
+    font-size: 14px;
+    margin: 8px 0;
+    color: #f7f3ee;
+}
+
+.mood-tracker select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.mood-tracker select:hover {
+    background: #e8e2d8;
+}
+
+/* ===================== Main Content ===================== */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.main-content-wrapper {
+    width: 100%;
+    text-align: center;
+}
+
+.welcome-text {
+    font-size: 28px;
+    font-weight: 600;
+    color: #f7f3ee;
+    text-shadow: 1px 1px 4px #2d2821;
+    margin-bottom: 20px;
+}
+
+/* ===================== Search Bar ===================== */
+.search-bar-container {
+    margin: 10px auto 30px auto;
+    text-align: center;
+    width: 45%;
+}
+
+.search-bar-container input[type="text"] {
+    width: 65%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #debba1;
+    font-size: 14px;
+    outline: none;
+    background: #f7f3ee;
+    transition: all 0.3s ease;
+}
+
+.search-bar-container input[type="text"]:focus {
+    border-color: #e8d8b8;
+    box-shadow: none;
+}
+
+.search-bar-container button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    font-size: 13px;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: all 0.3s ease;
+}
+
+.search-bar-container button:hover {
+    background: #e8e2d8;
+    transform: scale(1.05);
+}
+
+/* ===================== Top-right options ===================== */
+.top-right-options {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 2;
+}
+
+.top-right-options a {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    width: fit-content;
+    transition: all 0.2s ease;
+}
+
+.top-right-options a:hover {
+    transform: scale(1.1);
+    background: #e8e2d8;
+}
+
+/* ===================== Add Entry Button ===================== */
+.main-action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.main-action a.button-add {
+    padding: 20px 45px;
+    font-size: 26px;
+    border-radius: 12px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.main-action a.button-add:hover {
+    transform: scale(1.05) rotate(-1deg);
+    background: #e8e2d8;
+}
+
+/* ===================== Logout Button ===================== */
+.bottom-right-logout {
+    position: absolute;
+    bottom: 20px;
+    right: 0;
+    z-index: 2;
+}
+
+.bottom-right-logout form {
+    margin: 0;
+}
+
+.bottom-right-logout form button {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    text-align: center;
+    width: fit-content;
+    transition: all 0.2s ease;
+    box-shadow: none !important;
+    outline: none;
+}
+
+.bottom-right-logout form button:hover {
+    background: #e8e2d8;
+    transform: scale(1.1);
+}
+
+.bottom-right-logout form button:active {
+    transform: scale(0.95);
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard-container">
+  <div class="left-sidebar">
+    <h3>✨ Today</h3>
+    <div class="quote">"Write your heart out! 💛"</div>
+    <div class="mini-stats">
+      <p>📖 Entries: 12</p>
+      <p>⏰ Reminders: 3</p>
+      <p>⭐ Streak: 5 days</p>
+    </div>
+
+    <!-- Mood Tracker -->
+    <div class="mood-tracker">
+        <p>How's your day today?</p>
+        <select id="mood-select" onchange="setMood()">
+            <option value="">Select Mood</option>
+            <option value="⚡ Excited">Excited ⚡</option>
+            <option value="🌿 Calm">Calm 🌿</option>
+            <option value="🪞 Reflective">Reflective 🪞</option>
+            <option value="🔥 Frustrated">Frustrated 🔥</option>
+        </select>
+        <p id="selected-mood"></p>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="main-content-wrapper">
+      <div class="top-right-options">
+        <a href="{{ url_for('view_journal', username=username) }}">📖 View Entries</a>
+        <a href="{{ url_for('settings', username=username) }}">⚙️ Settings</a>
+        <a href="{{ url_for('reminders', username=username) }}">⏰ Reminders</a>
+        <a href="{{ url_for('profile', username=username) }}">👤 Profile</a>
+        <a href="{{ url_for('notifications', username=username) }}">🔔 Notifications</a>
+        <a href="{{ url_for('calendar', username=username) }}">📅 Calendar</a>
+        <a href="{{ url_for('stats', username=username) }}">📊 Stats</a>
+      </div>
+
+      <div class="welcome-text" id="welcome-text"></div>
+
+      <div class="search-bar-container">
+        <form action="{{ url_for('search_journal', username=username) }}" method="GET">
+          <input type="text" name="query" placeholder="Search your journal..." required>
+          <button type="submit">🔍</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="main-action">
+      <a href="{{ url_for('add_journal_page', username=username) }}" class="button-add">➕ Add Entry ✍️</a>
+    </div>
+
+    <div class="bottom-right-logout">
+      <form action="{{ url_for('logout', username=username) }}" method="POST">
+        <button type="submit">🚪 Logout</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const now = new Date();
+  const hour = now.getHours();
+  let greeting, emoji;
+
+  if(hour >= 5 && hour < 12) {
+      greeting = "Good morning";
+      emoji = "🌞";
+  } else if(hour >= 12 && hour < 17) {
+      greeting = "Good afternoon";
+      emoji = "🌤️";
+  } else if(hour >= 17 && hour < 21) {
+      greeting = "Good evening";
+      emoji = "🌇";
+  } else {
+      greeting = "Good night";
+      emoji = "🌙";
+  }
+
+  const username = "{{ username }}";
+  document.getElementById("welcome-text").innerText = `${emoji} ${greeting}, ${username}! ${emoji}`;
+
+  // Mood Tracker JS
+  function setMood() {
+      const moodSelect = document.getElementById("mood-select");
+      const selectedMood = moodSelect.value;
+      document.getElementById("selected-mood").innerText = selectedMood ? `Your mood today: ${selectedMood}` : '';
+  }
+</script>
+
+</body>
+</html>

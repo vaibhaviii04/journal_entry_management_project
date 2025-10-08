@@ -1,0 +1,489 @@
+/* ===================== General Reset & Full Height ===================== */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    color: #f7f3ee;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+/* ===================== Center Container for Forms ===================== */
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ===================== Form Styling ===================== */
+form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 40px 35px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(90, 75, 58, 0.25);
+    width: 360px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+form:hover {
+    transform: translateY(-5px);
+}
+
+h2 {
+    margin-bottom: 25px;
+    color: #4e3b2c;
+    font-weight: 600;
+}
+
+/* ===================== Input Fields ===================== */
+.input-container {
+    position: relative;
+    margin: 10px 0;
+}
+
+.input-container i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a67c52;
+}
+
+.input-container input[type="text"],
+.input-container input[type="password"],
+.input-container input[type="email"] {
+    width: 100%;
+    padding: 12px 15px 12px 35px;
+    border-radius: 10px;
+    border: 1px solid #cbb89d;
+    outline: none;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: #f8f6f2;
+}
+
+input:focus {
+    border-color: #b89f82;
+    box-shadow: 0 0 8px rgba(184, 159, 130, 0.5);
+}
+
+/* ===================== Toggle Password & Strength ===================== */
+#toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+#strength-msg {
+    font-weight: bold;
+    margin-top: 5px;
+    display: block;
+    text-align: right;
+    color: #4e3b2c;
+}
+
+/* ===================== Buttons ===================== */
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #f7f3ee;
+    color: #debba1;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #e8e2d8;
+    transform: scale(1.05);
+}
+
+button:active {
+    animation: bounce 0.2s;
+}
+
+/* ===================== Flash Messages ===================== */
+.alert {
+    background: #f3ede6;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    color: #6f5e4a;
+    font-weight: 500;
+}
+
+/* ===================== Links ===================== */
+p a {
+    color: #4e3b2c;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+p a:hover {
+    text-decoration: underline;
+    color: #92694d;
+}
+
+/* ===================== Dashboard Layout ===================== */
+.dashboard-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    z-index: 1;
+}
+
+.left-sidebar {
+    width: 200px;
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    color: #f7f3ee;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    z-index: 1;
+}
+
+.left-sidebar h3 { margin-top: 0; font-size: 16px; text-align: center; }
+.quote { font-size: 14px; font-style: italic; margin: 20px 0; text-align: center; }
+.mini-stats { margin-top: 30px; text-align: center; }
+.mini-stats p { margin: 5px 0; font-size: 14px; }
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+}
+
+.main-content-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.welcome-text {
+    margin-top: 30px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #f7f3ee;
+    text-shadow: 1px 1px 4px #2d2821;
+    text-align: center;
+}
+
+/* ===================== Search Bar ===================== */
+.search-bar-container {
+    margin: 20px auto;
+    text-align: center;
+    width: 50%;
+}
+
+.search-bar-container input[type="text"] {
+    width: 65%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    font-size: 14px;
+    outline: none;
+    background: #f7f3ee;
+    transition: all 0.3s ease;
+}
+
+.search-bar-container input[type="text"]:focus {
+    border-color: #e8d8b8;
+    box-shadow: none;
+}
+
+.search-bar-container button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: all 0.3s ease;
+}
+
+.search-bar-container button:hover {
+    background: #e8e2d8;
+    transform: scale(1.05);
+}
+
+/* ===================== Top-right options ===================== */
+.top-right-options {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 2;
+}
+
+.top-right-options a {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    width: fit-content;
+    transition: all 0.2s ease;
+}
+
+.top-right-options a:hover { 
+    transform: scale(1.1); 
+    background: #e8e2d8; 
+}
+
+.main-action {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-action a.button-add {
+    padding: 25px 50px;
+    font-size: 28px;
+    border-radius: 12px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.main-action a.button-add:hover {
+    transform: scale(1.05) rotate(-1deg);
+    background: #e8e2d8;
+}
+
+/* ===================== Bottom-right logout (fixed & matching top-right buttons) ===================== */
+.bottom-right-logout {
+    position: absolute;
+    bottom: 20px;
+    right: 0;
+    z-index: 2;
+}
+
+.bottom-right-logout form {
+    margin: 0;
+    padding: 0;
+    background: none !important;
+    box-shadow: none !important;
+}
+
+.bottom-right-logout form button {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    width: fit-content;
+    transition: all 0.2s ease;
+    box-shadow: none !important;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.bottom-right-logout form button:hover {
+    background: #e8e2d8;
+    transform: scale(1.05);
+}
+
+.bottom-right-logout form button:active {
+    transform: scale(0.95);
+}
+
+/* ===================== Animation ===================== */
+@keyframes bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* ===================== Add Journal Page ===================== */
+.add-journal-container {
+    width: 700px;
+    max-width: 90%;
+    margin: 80px auto;
+    padding: 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.add-journal-container textarea {
+    width: 100%;
+    min-height: 250px;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid #debba1;
+    font-size: 18px;
+    resize: vertical;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    transition: all 0.3s ease;
+}
+
+.add-journal-container textarea:focus {
+    border-color: #b89f82;
+    box-shadow: 0 0 10px rgba(184, 159, 130, 0.5);
+    outline: none;
+}
+
+.add-journal-container button,
+.add-journal-container .back-btn {
+    margin-top: 15px;
+}
+
+/* ===================== Settings Page ===================== */
+.settings-section {
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(78, 59, 44, 0.08); /* light soft shadow */
+}
+
+.settings-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #4e3b2c;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px 0;
+    font-size: 14px;
+}
+
+input[type="checkbox"] {
+    width: 0;
+    height: 0;
+    opacity: 0;
+    position: absolute;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.switch span {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #ccc;
+    border-radius: 24px;
+    transition: 0.4s;
+}
+
+.switch span:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+input:checked + .switch span {
+    background-color: #4e3b2c;
+}
+
+input:checked + .switch span:before {
+    transform: translateX(22px);
+}
+
+select, input[type="number"], input[type="time"] {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+select:hover, input:hover {
+    background: #e8e2d8;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.settings-section button {
+    padding: 8px 14px;
+    border: 1px solid #debba1;
+    border-radius: 8px;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+
+.settings-section button:hover {
+    background: #e8e2d8;
+    transform: scale(1.05);
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #4e3b2c;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.back-link:hover {
+    color: #2d2821;
+    transform: scale(1.05);
+}

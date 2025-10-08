@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>View Journal Entries</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    color: #f7f3ee;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    animation: fadeInDown 1s;
+}
+
+/* ===================== Search Bar ===================== */
+#searchInput {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #debba1;
+    margin-bottom: 20px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+#searchInput:focus {
+    border-color: #e8d8b8;
+    box-shadow: 0 0 8px rgba(184,159,130,0.5);
+}
+
+/* ===================== Journal Entry ===================== */
+.entry {
+    background: rgba(255,255,255,0.1);
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.4s ease, max-height 0.5s ease;
+    overflow: hidden;
+    max-height: 80px; /* collapsed by default */
+    position: relative;
+    opacity: 0;
+    animation: fadeIn 0.8s forwards;
+}
+
+.entry:nth-child(1) { animation-delay: 0.1s; }
+.entry:nth-child(2) { animation-delay: 0.2s; }
+.entry:nth-child(3) { animation-delay: 0.3s; }
+.entry:nth-child(4) { animation-delay: 0.4s; }
+.entry:nth-child(5) { animation-delay: 0.5s; }
+
+.entry:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 18px rgba(255,255,255,0.2);
+}
+
+.entry p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Read more arrow */
+.entry::after {
+    content: "▼";
+    position: absolute;
+    right: 15px;
+    bottom: 10px;
+    font-size: 16px;
+    color: #debba1;
+    transition: transform 0.3s ease;
+}
+
+.entry.expanded::after {
+    transform: rotate(180deg);
+}
+
+.entry.expanded {
+    max-height: 500px;
+}
+
+/* ===================== Back Button ===================== */
+.back-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    transform: scale(1.05);
+    background: #e8e2d8;
+}
+
+/* ===================== Animations ===================== */
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>{{ username }}'s Journal Entries</h1>
+
+    <input type="text" id="searchInput" placeholder="Search entries...">
+
+    {% if journals %}
+        {% for journal in journals %}
+            <div class="entry">
+                <p>{{ journal['content'] }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No journal entries found.</p>
+    {% endif %}
+
+    <a href="{{ url_for('dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
+</div>
+
+<script>
+// Toggle entry expansion
+document.querySelectorAll('.entry').forEach(entry => {
+    entry.addEventListener('click', () => {
+        entry.classList.toggle('expanded');
+    });
+});
+
+// Search/filter functionality
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', () => {
+    const filter = searchInput.value.toLowerCase();
+    document.querySelectorAll('.entry').forEach(entry => {
+        const text = entry.textContent.toLowerCase();
+        entry.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+</script>
+
+</body>
+</html>

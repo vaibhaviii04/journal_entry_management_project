@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Journal Entry</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    color: #f7f3ee;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 750px;  /* Increased width */
+    max-width: 90%;
+    padding: 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 25px;
+    font-size: 28px;
+}
+
+form textarea {
+    width: 100%;
+    min-height: 250px; /* Slightly shorter height */
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid #debba1;
+    resize: vertical;
+    font-size: 18px;
+    margin-bottom: 10px;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    transition: all 0.3s ease;
+}
+
+form textarea:focus {
+    border-color: #e8d8b8;
+    box-shadow: 0 0 10px rgba(232, 216, 184, 0.5);
+    outline: none;
+}
+
+.char-count {
+    text-align: right;
+    font-size: 14px;
+    color: #debba1;
+    margin-bottom: 15px;
+}
+
+form button {
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+form button:hover {
+    transform: scale(1.05);
+    background: #e8e2d8;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    transform: scale(1.05);
+    background: #e8e2d8;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Add Journal Entry</h1>
+
+    <form action="{{ url_for('add_journal') }}" method="POST">
+        <textarea id="journal-content" name="content" placeholder="Write your thoughts here..." required></textarea>
+        <div class="char-count" id="char-count">0 characters</div>
+        <button type="submit">➕ Add Entry</button>
+    </form>
+
+    <a href="{{ url_for('dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
+</div>
+
+<script>
+const textarea = document.getElementById('journal-content');
+const charCount = document.getElementById('char-count');
+
+textarea.addEventListener('input', () => {
+    charCount.textContent = `${textarea.value.length} characters`;
+});
+</script>
+</body>
+</html>
