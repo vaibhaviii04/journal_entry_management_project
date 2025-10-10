@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import sqlite3
-import random, os
+import random, os, datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -34,6 +34,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             content TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     ''')
@@ -56,6 +57,31 @@ def init_db():
             theme TEXT DEFAULT 'light',
             default_view TEXT DEFAULT 'list',
             font_size INTEGER DEFAULT 16,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    ''')
+
+    # Reminders table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS reminders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            date TEXT NOT NULL,
+            time TEXT,
+            completed INTEGER DEFAULT 0,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    ''')
+
+    # Calendar events table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS calendar_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            date TEXT NOT NULL,
+            description TEXT,
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     ''')
@@ -278,12 +304,38 @@ def settings(username):
     return render_template('settings.html', username=username, theme=settings['theme'], default_view=settings['default_view'], font_size=settings['font_size'])
 
 # ------------------ REMINDERS ------------------
-@app.route('/reminders/<username>')
+@app.route('/reminders/<username>', methods=['GET', 'POST'])
 def reminders(username):
     if 'username' not in session or session['username'] != username:
         flash('Access denied.', 'error')
         return redirect(url_for('login'))
-    return render_template('reminders.html', username=username)
+
+    conn = get_db_connection()
+    user_id = conn.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()['id']
+
+    if request.method == 'POST':
+        title = request.form['title']
+        date = request.form['date']
+        time = request.form.get('time', '')
+        conn.execute('INSERT INTO reminders (user_id, title, date, time) VALUES (?, ?, ?, ?)',
+                     (user_id, title, date, time))
+        conn.commit()
+        flash('Reminder added!', 'success')
+
+    reminders = conn.execute('SELECT * FROM reminders WHERE user_id = ? ORDER BY date ASC', (user_id,)).fetchall()
+    conn.close()
+    return render_template('reminders.html', username=username, reminders=reminders)
+
+@app.route('/reminders/delete/<int:id>', methods=['POST'])
+def delete_reminder(id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    conn.execute('DELETE FROM reminders WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Reminder deleted!', 'success')
+    return redirect(url_for('reminders', username=session['username']))
 
 # ------------------ PROFILE ------------------
 @app.route('/profile/<username>')
@@ -299,7 +351,8 @@ def profile(username):
     return render_template('profile.html',
                            username=user['username'],
                            email=user['email'],
-                           profile_pic_url=url_for('static', filename='default_profile.png'))
+                           profile_pic_url=url_for('static', filename='default_profile.png'),
+                           account_creation_date="N/A")  # Add your real creation date if stored
 
 # ------------------ NOTIFICATIONS ------------------
 @app.route('/notifications/<username>')
@@ -336,21 +389,38 @@ def delete_notification(notification_id):
     return 'OK', 200
 
 # ------------------ CALENDAR ------------------
-@app.route('/calendar/<username>')
+@app.route('/calendar/<username>', methods=['GET', 'POST'])
 def calendar(username):
     if 'username' not in session or session['username'] != username:
         flash('Access denied.', 'error')
         return redirect(url_for('login'))
-    return render_template('calendar.html', username=username)
 
-# ------------------ STATS ------------------
-@app.route('/stats/<username>')
-def stats(username):
-    if 'username' not in session or session['username'] != username:
-        flash('Access denied.', 'error')
+    conn = get_db_connection()
+    user_id = conn.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()['id']
+
+    if request.method == 'POST':
+        title = request.form['title']
+        date = request.form['date']
+        description = request.form.get('description', '')
+        conn.execute('INSERT INTO calendar_events (user_id, title, date, description) VALUES (?, ?, ?, ?)',
+                     (user_id, title, date, description))
+        conn.commit()
+        flash('Event added!', 'success')
+
+    events = conn.execute('SELECT * FROM calendar_events WHERE user_id = ? ORDER BY date ASC', (user_id,)).fetchall()
+    conn.close()
+    return render_template('calendar.html', username=username, events=events)
+
+@app.route('/calendar/delete/<int:id>', methods=['POST'])
+def delete_calendar_event(id):
+    if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('stats.html', username=username)
+    conn = get_db_connection()
+    conn.execute('DELETE FROM calendar_events WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Calendar event deleted!', 'success')
+    return redirect(url_for('calendar', username=session['username']))
 
-# ------------------ RUN SERVER ------------------
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
