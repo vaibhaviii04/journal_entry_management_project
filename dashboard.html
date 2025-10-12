@@ -75,61 +75,75 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     position: relative;
+    padding-top: 100px;
 }
 
+/* Remove any black background */
 .main-content-wrapper {
-    width: 100%;
-    text-align: center;
+    background: transparent !important;
 }
 
+/* ===================== Welcome Text ===================== */
 .welcome-text {
-    font-size: 28px;
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
     font-weight: 600;
     color: #f7f3ee;
     text-shadow: 1px 1px 4px #2d2821;
-    margin-bottom: 20px;
+    z-index: 3;
+    text-align: center;
 }
 
 /* ===================== Search Bar ===================== */
 .search-bar-container {
-    margin: 10px auto 30px auto;
+    margin-top: 100px;
     text-align: center;
     width: 45%;
+    background: transparent;
+}
+
+.search-bar-container form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
 }
 
 .search-bar-container input[type="text"] {
     width: 65%;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     border: 1px solid #debba1;
     font-size: 14px;
     outline: none;
     background: #f7f3ee;
+    color: #4e3b2c;
     transition: all 0.3s ease;
 }
 
 .search-bar-container input[type="text"]:focus {
     border-color: #e8d8b8;
-    box-shadow: none;
 }
 
 .search-bar-container button {
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     border: 1px solid #debba1;
     background: #f7f3ee;
     color: #4e3b2c;
-    font-size: 13px;
+    font-size: 14px;
     cursor: pointer;
-    margin-left: 5px;
     transition: all 0.3s ease;
 }
 
 .search-bar-container button:hover {
     background: #e8e2d8;
-    transform: scale(1.05);
 }
 
 /* ===================== Top-right options ===================== */
@@ -151,10 +165,8 @@ html, body {
     border: 1px solid #debba1;
     background: #f7f3ee;
     color: #4e3b2c;
-    cursor: pointer;
     text-decoration: none;
     text-align: center;
-    width: fit-content;
     transition: all 0.2s ease;
 }
 
@@ -165,10 +177,10 @@ html, body {
 
 /* ===================== Add Entry Button ===================== */
 .main-action {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .main-action a.button-add {
@@ -184,16 +196,16 @@ html, body {
 }
 
 .main-action a.button-add:hover {
-    transform: scale(1.05) rotate(-1deg);
+    transform: scale(1.05);
     background: #e8e2d8;
 }
 
-/* ===================== Logout Button ===================== */
+/* ===================== Logout Button (shifted bottom-right) ===================== */
 .bottom-right-logout {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
-    right: 0;
-    z-index: 2;
+    right: 20px;
+    z-index: 999; /* always on top */
 }
 
 .bottom-right-logout form {
@@ -212,8 +224,6 @@ html, body {
     text-align: center;
     width: fit-content;
     transition: all 0.2s ease;
-    box-shadow: none !important;
-    outline: none;
 }
 
 .bottom-right-logout form button:hover {
@@ -261,7 +271,6 @@ html, body {
         <a href="{{ url_for('profile', username=username) }}">👤 Profile</a>
         <a href="{{ url_for('notifications', username=username) }}">🔔 Notifications</a>
         <a href="{{ url_for('calendar', username=username) }}">📅 Calendar</a>
-        <a href="{{ url_for('stats', username=username) }}">📊 Stats</a>
       </div>
 
       <div class="welcome-text" id="welcome-text"></div>
@@ -279,7 +288,7 @@ html, body {
     </div>
 
     <div class="bottom-right-logout">
-      <form action="{{ url_for('logout', username=username) }}" method="POST">
+      <form action="{{ url_for('logout') }}" method="POST">
         <button type="submit">🚪 Logout</button>
       </form>
     </div>
@@ -308,7 +317,6 @@ html, body {
   const username = "{{ username }}";
   document.getElementById("welcome-text").innerText = `${emoji} ${greeting}, ${username}! ${emoji}`;
 
-  // Mood Tracker JS
   function setMood() {
       const moodSelect = document.getElementById("mood-select");
       const selectedMood = moodSelect.value;

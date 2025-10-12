@@ -422,5 +422,64 @@ def delete_calendar_event(id):
     flash('Calendar event deleted!', 'success')
     return redirect(url_for('calendar', username=session['username']))
 
+# ------------------ UPDATE JOURNAL ENTRY ------------------
+@app.route('/update_journal/<int:entry_id>', methods=['GET', 'POST'])
+def update_entry(entry_id):
+    if 'username' not in session:
+        flash('Please log in first.', 'error')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    journal = conn.execute('SELECT * FROM journals WHERE id = ?', (entry_id,)).fetchone()
+    
+    if not journal:
+        conn.close()
+        flash('Journal entry not found.', 'error')
+        return redirect(url_for('dashboard'))
+
+    user_id = conn.execute('SELECT id FROM users WHERE username = ?', (session['username'],)).fetchone()['id']
+    if journal['user_id'] != user_id:
+        conn.close()
+        flash('Access denied.', 'error')
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        new_content = request.form['content']
+        conn.execute('UPDATE journals SET content = ? WHERE id = ?', (new_content, entry_id))
+        conn.commit()
+        conn.close()
+        flash('Journal entry updated!', 'success')
+        return redirect(url_for('view_journal', username=session['username']))
+
+    conn.close()
+    return render_template('update_journal.html', journal=journal, username=session['username'])
+
+# ------------------ DELETE JOURNAL ENTRY ------------------
+@app.route('/delete_journal/<int:entry_id>', methods=['POST'])
+def delete_entry(entry_id):
+    if 'username' not in session:
+        flash('Please log in first.', 'error')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    journal = conn.execute('SELECT * FROM journals WHERE id = ?', (entry_id,)).fetchone()
+    
+    if not journal:
+        conn.close()
+        flash('Journal entry not found.', 'error')
+        return redirect(url_for('dashboard'))
+
+    user_id = conn.execute('SELECT id FROM users WHERE username = ?', (session['username'],)).fetchone()['id']
+    if journal['user_id'] != user_id:
+        conn.close()
+        flash('Access denied.', 'error')
+        return redirect(url_for('dashboard'))
+
+    conn.execute('DELETE FROM journals WHERE id = ?', (entry_id,))
+    conn.commit()
+    conn.close()
+    flash('Journal entry deleted!', 'success')
+    return redirect(url_for('view_journal', username=session['username']))
+
 if __name__ == '__main__':
     app.run(debug=True)

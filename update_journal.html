@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Update Journal Entry</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    color: #f7f3ee;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    resize: vertical;
+    min-height: 150px;
+    font-size: 16px;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: #e8d8b8;
+    box-shadow: 0 0 8px rgba(184,159,130,0.5);
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background-color: #debba1;
+    color: #4e3b2c;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+    background-color: #e8d8b8;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    transform: scale(1.05);
+    background: #e8e2d8;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Update Journal Entry</h1>
+
+    <form method="POST">
+        <textarea name="content">{{ journal['content'] }}</textarea>
+        <button type="submit">Update</button>
+    </form>
+
+    <a href="{{ url_for('view_journal', username=username) }}" class="back-btn">⬅ Back to Journal</a>
+</div>
+
+</body>
+</html>
