@@ -352,7 +352,7 @@ def profile(username):
                            username=user['username'],
                            email=user['email'],
                            profile_pic_url=url_for('static', filename='default_profile.png'),
-                           account_creation_date="N/A")  # Add your real creation date if stored
+                           account_creation_date="N/A")
 
 # ------------------ NOTIFICATIONS ------------------
 @app.route('/notifications/<username>')
@@ -481,5 +481,42 @@ def delete_entry(entry_id):
     flash('Journal entry deleted!', 'success')
     return redirect(url_for('view_journal', username=session['username']))
 
+# ------------------ EXPORT JOURNAL ------------------
+@app.route('/export_journal')
+def export_journal():
+    if 'username' not in session:
+        flash('Please log in first.', 'error')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    conn = get_db_connection()
+    user_id = conn.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()['id']
+    journals = conn.execute('SELECT * FROM journals WHERE user_id = ? ORDER BY created_at ASC', (user_id,)).fetchall()
+    conn.close()
+
+    if not journals:
+        flash('No journal entries to export.', 'info')
+        return redirect(url_for('dashboard'))
+
+    # Create a text file in memory
+    from io import StringIO
+    file_data = StringIO()
+    file_data.write(f"Journal Entries for {username}\n\n")
+    for i, entry in enumerate(journals, start=1):
+        created_at = entry['created_at']
+        content = entry['content']
+        file_data.write(f"Entry {i} - {created_at}\n{content}\n\n")
+
+    file_data.seek(0)
+
+    from flask import send_file
+    return send_file(
+        file_data,
+        as_attachment=True,
+        download_name=f"{username}_journal.txt",
+        mimetype='text/plain'
+    )
+
+# ------------------ RUN APP ------------------
 if __name__ == '__main__':
     app.run(debug=True)

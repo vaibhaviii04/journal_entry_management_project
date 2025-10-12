@@ -171,7 +171,24 @@ html, body {
 }
 
 .top-right-options a:hover {
-    transform: scale(1.1);
+    background: #e8e2d8;
+}
+
+/* Export Journal Button */
+.button-export {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.2s ease;
+}
+
+.button-export:hover {
     background: #e8e2d8;
 }
 
@@ -228,12 +245,9 @@ html, body {
 
 .bottom-right-logout form button:hover {
     background: #e8e2d8;
-    transform: scale(1.1);
 }
 
-.bottom-right-logout form button:active {
-    transform: scale(0.95);
-}
+/* ===================== Greetings & Mood JS ===================== */
 </style>
 </head>
 <body>
@@ -271,6 +285,7 @@ html, body {
         <a href="{{ url_for('profile', username=username) }}">👤 Profile</a>
         <a href="{{ url_for('notifications', username=username) }}">🔔 Notifications</a>
         <a href="{{ url_for('calendar', username=username) }}">📅 Calendar</a>
+        <a href="{{ url_for('export_journal') }}" class="button-export">📄 Export Journal</a>
       </div>
 
       <div class="welcome-text" id="welcome-text"></div>
