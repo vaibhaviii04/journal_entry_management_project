@@ -77,6 +77,41 @@ h1 {
     line-height: 1.5;
 }
 
+/* Buttons inside each entry */
+.entry-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.update-btn {
+    background: #e3b77b;
+    color: #2d2821;
+}
+.update-btn:hover {
+    background: #f0c98c;
+    transform: scale(1.05);
+}
+
+.delete-btn {
+    background: #d9534f;
+    color: white;
+}
+.delete-btn:hover {
+    background: #c9302c;
+    transform: scale(1.05);
+}
+
 /* Read more arrow */
 .entry::after {
     content: "▼";
@@ -136,6 +171,10 @@ h1 {
         {% for journal in journals %}
             <div class="entry">
                 <p>{{ journal['content'] }}</p>
+                <div class="entry-actions">
+                    <a href="{{ url_for('update_entry', entry_id=journal['id']) }}" class="action-btn update-btn">✏️ Edit</a>
+                    <a href="{{ url_for('delete_entry', entry_id=journal['id']) }}" class="action-btn delete-btn">🗑️ Delete</a>
+                </div>
             </div>
         {% endfor %}
     {% else %}
@@ -148,8 +187,10 @@ h1 {
 <script>
 // Toggle entry expansion
 document.querySelectorAll('.entry').forEach(entry => {
-    entry.addEventListener('click', () => {
-        entry.classList.toggle('expanded');
+    entry.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('action-btn')) {
+            entry.classList.toggle('expanded');
+        }
     });
 });
 
