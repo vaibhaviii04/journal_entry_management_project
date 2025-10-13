@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reminders</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to right, #2d2821, #8f7455);
+  color: #f7f3ee;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  margin-top: 40px;
+  font-size: 28px;
+}
+
+.reminder-container {
+  margin-top: 30px;
+  width: 80%;
+  max-width: 700px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.add-reminder {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.add-reminder input, .add-reminder button {
+  border-radius: 8px;
+  outline: none;
+}
+
+.add-reminder input[type="text"], .add-reminder input[type="date"], .add-reminder input[type="time"] {
+  padding: 8px 10px;
+  border: 1px solid #debba1;
+  background: #f7f3ee;
+  color: #4e3b2c;
+  margin-right: 10px;
+}
+
+.add-reminder button {
+  padding: 8px 14px;
+  background: #f7f3ee;
+  color: #4e3b2c;
+  border: 1px solid #debba1;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-reminder button:hover {
+  background: #e8e2d8;
+  transform: scale(1.05);
+}
+
+.reminder-list {
+  list-style: none;
+  padding: 0;
+}
+
+.reminder-item {
+  background: rgba(255,255,255,0.1);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+<body>
+<h1>⏰ Reminders</h1>
+
+<div class="reminder-container">
+  <!-- ADD REMINDER FORM -->
+  <form class="add-reminder" method="POST" action="{{ url_for('reminders', username=username) }}">
+    <input type="text" name="title" placeholder="Enter new reminder..." required>
+    <input type="date" name="date" required>
+    <input type="time" name="time">
+    <button type="submit">Add</button>
+  </form>
+
+  <!-- LIST OF REMINDERS -->
+  <ul class="reminder-list">
+    {% for reminder in reminders %}
+      <li class="reminder-item">
+        {{ reminder['title'] }} - {{ reminder['date'] }} {{ reminder['time'] }}
+      </li>
+    {% endfor %}
+    {% if reminders|length == 0 %}
+      <li class="reminder-item">No reminders added yet.</li>
+    {% endif %}
+  </ul>
+</div>
+</body>
+</html>
