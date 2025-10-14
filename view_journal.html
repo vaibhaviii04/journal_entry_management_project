@@ -172,8 +172,13 @@ h1 {
             <div class="entry">
                 <p>{{ journal['content'] }}</p>
                 <div class="entry-actions">
-                    <a href="{{ url_for('update_entry', entry_id=journal['id']) }}" class="action-btn update-btn">✏️ Edit</a>
-                    <a href="{{ url_for('delete_entry', entry_id=journal['id']) }}" class="action-btn delete-btn">🗑️ Delete</a>
+                    <!-- Corrected Edit button -->
+                    <a href="{{ url_for('update_journal', id=journal['id']) }}" class="action-btn update-btn">✏️ Edit</a>
+                    
+                    <!-- Corrected Delete button -->
+                    <form action="{{ url_for('delete_journal', id=journal['id']) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="action-btn delete-btn">🗑️ Delete</button>
+                    </form>
                 </div>
             </div>
         {% endfor %}

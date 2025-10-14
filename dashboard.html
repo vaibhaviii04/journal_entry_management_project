@@ -22,9 +22,9 @@ html, body {
     display: flex;
     flex-direction: row;
     position: relative;
-    z-index: 1;
 }
 
+/* ===================== Left Sidebar ===================== */
 .left-sidebar {
     width: 200px;
     background: rgba(255,255,255,0.05);
@@ -34,39 +34,19 @@ html, body {
     padding: 20px 10px;
     color: #f7f3ee;
     border-right: 1px solid rgba(255,255,255,0.1);
-    z-index: 1;
 }
 
-.left-sidebar h3 { margin-top: 0; font-size: 16px; text-align: center; }
-.quote { font-size: 14px; font-style: italic; margin: 20px 0; text-align: center; }
-.mini-stats { margin-top: 30px; text-align: center; }
-.mini-stats p { margin: 5px 0; font-size: 14px; }
-
-/* ===================== Mood Tracker ===================== */
-.mood-tracker {
-    margin-top: 30px;
+.left-sidebar h3 {
+    margin-top: 0;
+    font-size: 16px;
     text-align: center;
 }
 
-.mood-tracker p {
+.quote {
     font-size: 14px;
-    margin: 8px 0;
-    color: #f7f3ee;
-}
-
-.mood-tracker select {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #debba1;
-    background: #f7f3ee;
-    color: #4e3b2c;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.mood-tracker select:hover {
-    background: #e8e2d8;
+    font-style: italic;
+    margin: 20px 0;
+    text-align: center;
 }
 
 /* ===================== Main Content ===================== */
@@ -74,57 +54,51 @@ html, body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; 
     justify-content: flex-start;
     position: relative;
-    padding-top: 100px;
-}
-
-/* Remove any black background */
-.main-content-wrapper {
-    background: transparent !important;
 }
 
 /* ===================== Welcome Text ===================== */
 .welcome-text {
-    position: absolute;
-    top: 30px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 40px;
     font-size: 30px;
     font-weight: 600;
     color: #f7f3ee;
     text-shadow: 1px 1px 4px #2d2821;
-    z-index: 3;
     text-align: center;
+    z-index: 3;
 }
 
 /* ===================== Search Bar ===================== */
 .search-bar-container {
-    margin-top: 100px;
-    text-align: center;
-    width: 45%;
-    background: transparent;
+    margin-top: 35px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .search-bar-container form {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    background: transparent;
+    background: rgba(0,0,0,0.3);
+    padding: 20px 25px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .search-bar-container input[type="text"] {
-    width: 65%;
+    width: 280px;
     padding: 10px 14px;
-    border-radius: 6px;
     border: 1px solid #debba1;
+    border-radius: 8px;
     font-size: 14px;
     outline: none;
     background: #f7f3ee;
     color: #4e3b2c;
     transition: all 0.3s ease;
+    margin-bottom: 10px;
 }
 
 .search-bar-container input[type="text"]:focus {
@@ -132,14 +106,18 @@ html, body {
 }
 
 .search-bar-container button {
-    padding: 10px 14px;
-    border-radius: 6px;
+    width: 45px;
+    height: 40px;
+    border-radius: 8px;
     border: 1px solid #debba1;
     background: #f7f3ee;
     color: #4e3b2c;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-bar-container button:hover {
@@ -154,7 +132,6 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    z-index: 2;
 }
 
 .top-right-options a {
@@ -194,10 +171,9 @@ html, body {
 
 /* ===================== Add Entry Button ===================== */
 .main-action {
-    position: absolute;
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
 }
 
 .main-action a.button-add {
@@ -217,12 +193,14 @@ html, body {
     background: #e8e2d8;
 }
 
-/* ===================== Logout Button (shifted bottom-right) ===================== */
+/* ===================== Logout Button ===================== */
 .bottom-right-logout {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 999; /* always on top */
+    z-index: 999;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .bottom-right-logout form {
@@ -239,15 +217,54 @@ html, body {
     color: #4e3b2c;
     cursor: pointer;
     text-align: center;
-    width: fit-content;
     transition: all 0.2s ease;
+    min-width: 90px;
 }
 
 .bottom-right-logout form button:hover {
     background: #e8e2d8;
 }
 
-/* ===================== Greetings & Mood JS ===================== */
+/* ===================== Dashboard Notifications (Left Sidebar) ===================== */
+.recent-notifications {
+    position: absolute;
+    top: 110px; /* under the quote */
+    left: 10px; 
+    width: 180px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    color: #f7f3ee;
+    text-align: left;
+    font-size: 13px;
+}
+
+.recent-notifications ul {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 5px 0;
+}
+
+.recent-notifications li {
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-notifications h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+}
+
+.recent-notifications a.view-all {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #f7f3ee;
+    text-decoration: underline;
+}
 </style>
 </head>
 <body>
@@ -255,53 +272,50 @@ html, body {
 <div class="dashboard-container">
   <div class="left-sidebar">
     <h3>✨ Today</h3>
-    <div class="quote">"Write your heart out! 💛"</div>
-    <div class="mini-stats">
-      <p>📖 Entries: 12</p>
-      <p>⏰ Reminders: 3</p>
-      <p>⭐ Streak: 5 days</p>
-    </div>
+    <div class="quote">"let your words breathe! 💛"</div>
 
-    <!-- Mood Tracker -->
-    <div class="mood-tracker">
-        <p>How's your day today?</p>
-        <select id="mood-select" onchange="setMood()">
-            <option value="">Select Mood</option>
-            <option value="⚡ Excited">Excited ⚡</option>
-            <option value="🌿 Calm">Calm 🌿</option>
-            <option value="🪞 Reflective">Reflective 🪞</option>
-            <option value="🔥 Frustrated">Frustrated 🔥</option>
-        </select>
-        <p id="selected-mood"></p>
+    <!-- Dashboard Notifications -->
+    <div class="recent-notifications">
+      <h3>🔔 Notifications</h3>
+      {% if notifications %}
+        <ul>
+          {% for n in notifications[:5] %}
+            <li title="{{ n.message }}">{{ n.message[:60] }}{% if n.message|length > 60 %}…{% endif %}</li>
+          {% endfor %}
+        </ul>
+        <a href="{{ url_for('notifications', username=username) }}" class="view-all">View All →</a>
+      {% else %}
+        <p>No new notifications.</p>
+      {% endif %}
     </div>
   </div>
 
   <div class="main-content">
-    <div class="main-content-wrapper">
-      <div class="top-right-options">
-        <a href="{{ url_for('view_journal', username=username) }}">📖 View Entries</a>
-        <a href="{{ url_for('settings', username=username) }}">⚙️ Settings</a>
-        <a href="{{ url_for('reminders', username=username) }}">⏰ Reminders</a>
-        <a href="{{ url_for('profile', username=username) }}">👤 Profile</a>
-        <a href="{{ url_for('notifications', username=username) }}">🔔 Notifications</a>
-        <a href="{{ url_for('calendar', username=username) }}">📅 Calendar</a>
-        <a href="{{ url_for('export_journal') }}" class="button-export">📄 Export Journal</a>
-      </div>
-
-      <div class="welcome-text" id="welcome-text"></div>
-
-      <div class="search-bar-container">
-        <form action="{{ url_for('search_journal', username=username) }}" method="GET">
-          <input type="text" name="query" placeholder="Search your journal..." required>
-          <button type="submit">🔍</button>
-        </form>
-      </div>
+    <div class="top-right-options">
+      <a href="{{ url_for('view_journal', username=username) }}">📖 View Entries</a>
+      <a href="{{ url_for('settings', username=username) }}">⚙️ Settings</a>
+      <a href="{{ url_for('reminders', username=username) }}">⏰ Reminders</a>
+      <a href="{{ url_for('profile', username=username) }}">👤 Profile</a>
+      <a href="{{ url_for('calendar', username=username) }}">📅 Calendar</a>
+      <a href="{{ url_for('export_journal') }}" class="button-export">📄 Export Journal</a>
     </div>
 
+    <div class="welcome-text" id="welcome-text"></div>
+
+    <!-- Search Bar -->
+    <div class="search-bar-container">
+      <form action="{{ url_for('search_journal', username=username) }}" method="GET">
+        <input type="text" name="query" placeholder="Search your journal..." required>
+        <button type="submit">🔍</button>
+      </form>
+    </div>
+
+    <!-- Add Entry Button -->
     <div class="main-action">
       <a href="{{ url_for('add_journal_page', username=username) }}" class="button-add">➕ Add Entry ✍️</a>
     </div>
 
+    <!-- Logout Button -->
     <div class="bottom-right-logout">
       <form action="{{ url_for('logout') }}" method="POST">
         <button type="submit">🚪 Logout</button>
@@ -331,12 +345,6 @@ html, body {
 
   const username = "{{ username }}";
   document.getElementById("welcome-text").innerText = `${emoji} ${greeting}, ${username}! ${emoji}`;
-
-  function setMood() {
-      const moodSelect = document.getElementById("mood-select");
-      const selectedMood = moodSelect.value;
-      document.getElementById("selected-mood").innerText = selectedMood ? `Your mood today: ${selectedMood}` : '';
-  }
 </script>
 
 </body>

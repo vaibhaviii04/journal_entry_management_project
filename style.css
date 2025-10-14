@@ -247,7 +247,7 @@ p a:hover {
     cursor: pointer;
     text-decoration: none;
     text-align: center;
-    width: fit-content;
+    width: 130px;
     transition: all 0.2s ease;
 }
 
@@ -256,6 +256,7 @@ p a:hover {
     background: #e8e2d8; 
 }
 
+/* ===================== Main Add Entry Button ===================== */
 .main-action {
     flex: 1;
     display: flex;
@@ -280,12 +281,14 @@ p a:hover {
     background: #e8e2d8;
 }
 
-/* ===================== Bottom-right logout (fixed & matching top-right buttons) ===================== */
+/* ===================== Bottom-right logout (fixed & aligned to right column) ===================== */
 .bottom-right-logout {
-    position: absolute;
-    bottom: 20px;
-    right: 0;
-    z-index: 2;
+    position: fixed;
+    bottom: 25px;
+    right: 20px;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .bottom-right-logout form {
@@ -306,13 +309,8 @@ p a:hover {
     cursor: pointer;
     text-decoration: none;
     text-align: center;
-    width: fit-content;
+    width: 130px;
     transition: all 0.2s ease;
-    box-shadow: none !important;
-    outline: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
 }
 
 .bottom-right-logout form button:hover {
@@ -373,7 +371,7 @@ p a:hover {
     padding: 20px;
     margin-bottom: 25px;
     background: #fff;
-    box-shadow: 0 4px 10px rgba(78, 59, 44, 0.08); /* light soft shadow */
+    box-shadow: 0 4px 10px rgba(78, 59, 44, 0.08);
 }
 
 .settings-section h3 {
