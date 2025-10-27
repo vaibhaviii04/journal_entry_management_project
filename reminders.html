@@ -39,23 +39,22 @@ h1 {
   margin-bottom: 20px;
 }
 
-.add-reminder input, .add-reminder button {
-  border-radius: 8px;
-  outline: none;
-}
-
-.add-reminder input[type="text"], .add-reminder input[type="date"], .add-reminder input[type="time"] {
+.add-reminder input {
   padding: 8px 10px;
+  border-radius: 8px;
   border: 1px solid #debba1;
   background: #f7f3ee;
   color: #4e3b2c;
-  margin-right: 10px;
+  width: 70%;
+  outline: none;
 }
 
 .add-reminder button {
+  margin-left: 10px;
   padding: 8px 14px;
   background: #f7f3ee;
   color: #4e3b2c;
+  border-radius: 8px;
   border: 1px solid #debba1;
   cursor: pointer;
   transition: 0.2s;
@@ -72,36 +71,57 @@ h1 {
 }
 
 .reminder-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: rgba(255,255,255,0.1);
   padding: 10px 15px;
   border-radius: 8px;
   margin-bottom: 10px;
 }
+
+.reminder-item button {
+  border: none;
+  background: #f7f3ee;
+  color: #4e3b2c;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.reminder-item button:hover {
+  background: #e8e2d8;
+}
 </style>
 </head>
 <body>
 <h1>⏰ Reminders</h1>
-
 <div class="reminder-container">
-  <!-- ADD REMINDER FORM -->
-  <form class="add-reminder" method="POST" action="{{ url_for('reminders', username=username) }}">
-    <input type="text" name="title" placeholder="Enter new reminder..." required>
-    <input type="date" name="date" required>
-    <input type="time" name="time">
-    <button type="submit">Add</button>
-  </form>
-
-  <!-- LIST OF REMINDERS -->
-  <ul class="reminder-list">
-    {% for reminder in reminders %}
-      <li class="reminder-item">
-        {{ reminder['title'] }} - {{ reminder['date'] }} {{ reminder['time'] }}
-      </li>
-    {% endfor %}
-    {% if reminders|length == 0 %}
-      <li class="reminder-item">No reminders added yet.</li>
-    {% endif %}
-  </ul>
+  <div class="add-reminder">
+    <input type="text" id="reminderInput" placeholder="Enter new reminder...">
+    <button onclick="addReminder()">Add</button>
+  </div>
+  <ul class="reminder-list" id="reminderList"></ul>
 </div>
+
+<script>
+function addReminder() {
+  const input = document.getElementById('reminderInput');
+  const list = document.getElementById('reminderList');
+  const value = input.value.trim();
+  if (!value) return;
+
+  const li = document.createElement('li');
+  li.className = 'reminder-item';
+  li.innerHTML = `${value} <button onclick="removeReminder(this)">Delete</button>`;
+  list.appendChild(li);
+  input.value = '';
+}
+
+function removeReminder(btn) {
+  btn.parentElement.remove();
+}
+</script>
 </body>
 </html>

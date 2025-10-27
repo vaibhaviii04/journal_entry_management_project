@@ -12,97 +12,64 @@ body {
     color: #f7f3ee;
     margin: 0;
     padding: 0;
-}
-
-.container {
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    text-align: center;
 }
 
 h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    animation: fadeInDown 1s;
+    margin-top: 20px;
+    color: #f7f3ee;
 }
 
-/* ===================== Search Bar ===================== */
-#searchInput {
-    width: 100%;
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: 1px solid #debba1;
-    margin-bottom: 20px;
-    font-size: 16px;
-    outline: none;
-    transition: all 0.3s ease;
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-#searchInput:focus {
-    border-color: #e8d8b8;
-    box-shadow: 0 0 8px rgba(184,159,130,0.5);
-}
-
-/* ===================== Journal Entry ===================== */
 .entry {
-    background: rgba(255,255,255,0.1);
-    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.2);
     padding: 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.4s ease, max-height 0.5s ease;
-    overflow: hidden;
-    max-height: 80px; /* collapsed by default */
-    position: relative;
-    opacity: 0;
-    animation: fadeIn 0.8s forwards;
-}
-
-.entry:nth-child(1) { animation-delay: 0.1s; }
-.entry:nth-child(2) { animation-delay: 0.2s; }
-.entry:nth-child(3) { animation-delay: 0.3s; }
-.entry:nth-child(4) { animation-delay: 0.4s; }
-.entry:nth-child(5) { animation-delay: 0.5s; }
-
-.entry:hover {
-    transform: scale(1.02);
-    box-shadow: 0 6px 18px rgba(255,255,255,0.2);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    text-align: left;
 }
 
 .entry p {
+    white-space: pre-wrap;
+}
+
+/* Keep forms inline so buttons stay side-by-side */
+form {
+    display: inline;
     margin: 0;
-    line-height: 1.5;
+    padding: 0;
 }
 
-/* Buttons inside each entry */
-.entry-actions {
-    margin-top: 10px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
+/* Base style for both buttons */
 .action-btn {
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 8px 16px;
+    margin: 8px 4px 0 0;
     border: none;
-    font-size: 14px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: 0.3s;
+    font-weight: 500;
 }
 
+/* Edit button */
 .update-btn {
-    background: #e3b77b;
-    color: #2d2821;
+    background: #debba1;
+    color: #4e3b2c;
 }
 .update-btn:hover {
-    background: #f0c98c;
+    background: #e8d8b8;
     transform: scale(1.05);
 }
 
+/* Delete button */
 .delete-btn {
     background: #d9534f;
     color: white;
@@ -112,103 +79,46 @@ h1 {
     transform: scale(1.05);
 }
 
-/* Read more arrow */
-.entry::after {
-    content: "▼";
-    position: absolute;
-    right: 15px;
-    bottom: 10px;
-    font-size: 16px;
-    color: #debba1;
-    transition: transform 0.3s ease;
-}
-
-.entry.expanded::after {
-    transform: rotate(180deg);
-}
-
-.entry.expanded {
-    max-height: 500px;
-}
-
-/* ===================== Back Button ===================== */
+/* Back button */
 .back-btn {
     display: inline-block;
     margin-top: 20px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid #debba1;
-    background: #f7f3ee;
-    color: #4e3b2c;
     text-decoration: none;
-    transition: all 0.3s ease;
+    background: #f7f3ee;
+    color: #2d2821;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: 0.3s;
 }
 
 .back-btn:hover {
-    transform: scale(1.05);
-    background: #e8e2d8;
-}
-
-/* ===================== Animations ===================== */
-@keyframes fadeIn {
-    to { opacity: 1; }
-}
-
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    background: #e8d8b8;
 }
 </style>
 </head>
 <body>
+    <h1>Your Journal Entries</h1>
 
-<div class="container">
-    <h1>{{ username }}'s Journal Entries</h1>
-
-    <input type="text" id="searchInput" placeholder="Search entries...">
-
-    {% if journals %}
-        {% for journal in journals %}
-            <div class="entry">
-                <p>{{ journal['content'] }}</p>
-                <div class="entry-actions">
-                    <!-- Corrected Edit button -->
-                    <a href="{{ url_for('update_journal', id=journal['id']) }}" class="action-btn update-btn">✏️ Edit</a>
-                    
-                    <!-- Corrected Delete button -->
-                    <form action="{{ url_for('delete_journal', id=journal['id']) }}" method="POST" style="display:inline;">
+    <div class="container">
+        {% if journals %}
+            {% for journal in journals %}
+                <div class="entry">
+                    <p>{{ journal['content'] }}</p>
+                    <!-- Edit button -->
+                    <form action="{{ url_for('update_journal', id=journal['id']) }}" method="GET">
+                        <button type="submit" class="action-btn update-btn">✏️ Edit</button>
+                    </form>
+                    <!-- Delete button -->
+                    <form action="{{ url_for('delete_journal', id=journal['id']) }}" method="POST">
                         <button type="submit" class="action-btn delete-btn">🗑️ Delete</button>
                     </form>
                 </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No journal entries found.</p>
-    {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>No journal entries yet.</p>
+        {% endif %}
+    </div>
 
     <a href="{{ url_for('dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
-</div>
-
-<script>
-// Toggle entry expansion
-document.querySelectorAll('.entry').forEach(entry => {
-    entry.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('action-btn')) {
-            entry.classList.toggle('expanded');
-        }
-    });
-});
-
-// Search/filter functionality
-const searchInput = document.getElementById('searchInput');
-searchInput.addEventListener('input', () => {
-    const filter = searchInput.value.toLowerCase();
-    document.querySelectorAll('.entry').forEach(entry => {
-        const text = entry.textContent.toLowerCase();
-        entry.style.display = text.includes(filter) ? '' : 'none';
-    });
-});
-</script>
-
 </body>
 </html>
