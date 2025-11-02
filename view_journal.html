@@ -79,6 +79,44 @@ form {
     transform: scale(1.05);
 }
 
+/* Export buttons - NEW */
+.export-buttons {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    display: inline-block;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-weight: 500;
+}
+
+.export-txt {
+    background: #5cb85c;
+    color: white;
+}
+
+.export-txt:hover {
+    background: #4cae4c;
+    transform: scale(1.05);
+}
+
+.export-pdf {
+    background: #0275d8;
+    color: white;
+}
+
+.export-pdf:hover {
+    background: #025aa5;
+    transform: scale(1.05);
+}
+
 /* Back button */
 .back-btn {
     display: inline-block;
@@ -99,25 +137,41 @@ form {
 <body>
     <h1>Your Journal Entries</h1>
 
-    <div class="container">
-        {% if journals %}
-            {% for journal in journals %}
-                <div class="entry">
-                    <p>{{ journal['content'] }}</p>
-                    <!-- Edit button -->
-                    <form action="{{ url_for('update_journal', id=journal['id']) }}" method="GET">
-                        <button type="submit" class="action-btn update-btn">✏️ Edit</button>
-                    </form>
-                    <!-- Delete button -->
-                    <form action="{{ url_for('delete_journal', id=journal['id']) }}" method="POST">
-                        <button type="submit" class="action-btn delete-btn">🗑️ Delete</button>
-                    </form>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No journal entries yet.</p>
-        {% endif %}
-    </div>
+    <!-- ADD EXPORT BUTTONS HERE -->
+    {% if journals %}
+    <!-- Export buttons -->
+<div class="export-buttons">
+        <a href="{{ url_for('search_entry', username=username) }}" class="export-btn export-txt">🔍 Search Entry</a>
+     <a href="{{ url_for('export_journal', username=username) }}" class="export-btn export-txt">📄 Export as TXT</a>
+     <a href="{{ url_for('export_journal_pdf', username=username) }}" class="export-btn export-pdf">📑 Export as PDF</a>
+</div>
+    {% endif %}
+
+  <div class="container">
+    {% if journals %}
+        {% for journal in journals %}
+            <div class="entry">
+                <h3 style="margin: 0 0 10px 0; color: #debba1;">
+                    {{ journal['title'] if journal['title'] else 'Untitled' }}
+                </h3>
+                <p style="font-size: 12px; color: #ccc; margin: 0 0 10px 0;">
+                    📅 {{ journal['created_at'] }}
+                </p>
+                <p>{{ journal['content'] }}</p>
+                <!-- Edit button -->
+<form action="{{ url_for('update_journal', username=username, id=journal['id']) }}" method="GET">
+    <button type="submit" class="action-btn update-btn">✏️ Edit</button>
+</form>
+<!-- Delete button -->
+<form action="{{ url_for('delete_journal', username=username, id=journal['id']) }}" method="POST">
+    <button type="submit" class="action-btn delete-btn">🗑️ Delete</button>
+</form>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No journal entries yet.</p>
+    {% endif %}
+</div>
 
     <a href="{{ url_for('dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
 </body>
