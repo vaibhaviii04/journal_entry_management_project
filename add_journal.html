@@ -19,110 +19,97 @@ body {
 }
 
 .container {
-    width: 650px;
-    max-width: 90%;
-    padding: 35px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.25);
-    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 h1 {
-    margin-bottom: 25px;
-    font-size: 28px;
-    color: #f7f3ee;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-/* ✅ Textarea styling — enforced with !important */
-form textarea {
-    width: 100%;
-    min-height: 200px;
-    padding: 18px;
-    border-radius: 10px;
-    border: 1px solid #debba1 !important;
-    resize: vertical;
-    font-size: 17px;
-    background: #fffdf8 !important; /* Bright parchment */
-    color: #3b2e23 !important;
-    transition: all 0.3s ease;
+form {
+    display: flex;
+    flex-direction: column;
 }
 
-form textarea::placeholder {
-    color: #a08d7a !important;
-    font-style: italic;
-}
-
-form textarea:focus {
-    border-color: #e8d8b8 !important;
-    box-shadow: 0 0 10px rgba(232, 216, 184, 0.5) !important;
-    outline: none;
-}
-
-/* Character counter */
-.char-count {
-    text-align: right;
-    font-size: 14px;
-    color: #debba1;
-    margin: 8px 0 15px;
-}
-
-/* Add Entry button */
-form button {
-    padding: 12px 28px;
-    border-radius: 10px;
-    border: none;
-    background: #debba1 !important;
-    color: #2d2821 !important;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-form button:hover {
-    transform: scale(1.05);
-    background: #e8d8b8 !important;
-}
-
-/* Back button */
-.back-btn {
-    display: inline-block;
-    margin-top: 25px;
-    padding: 10px 20px;
+input[type="text"],
+textarea {
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #debba1;
     border-radius: 8px;
-    background: #f7f3ee !important;
-    color: #2d2821 !important;
-    text-decoration: none;
-    font-weight: 500;
+    font-size: 14px;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    font-family: 'Poppins', sans-serif;
+}
+
+textarea {
+    min-height: 200px;
+    resize: vertical;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+button, .back-btn {
+    padding: 10px 25px;
+    border: 1px solid #debba1;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
     transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button {
+    background: #f7f3ee;
+    color: #4e3b2c;
+}
+
+button:hover {
+    background: #e8d8b8;
+}
+
+.back-btn {
+    background: #8f7455;
+    color: #f7f3ee;
+    border-color: #8f7455;
 }
 
 .back-btn:hover {
-    transform: scale(1.05);
-    background: #e8d8b8 !important;
+    background: #7a6447;
 }
 </style>
 </head>
 <body>
-<div class="container">
-    <h1>Add Journal Entry</h1>
-
-    <form action="{{ url_for('add_journal') }}" method="POST">
-        <textarea id="journal-content" name="content" placeholder="Write your thoughts here..." required></textarea>
-        <div class="char-count" id="char-count">0 characters</div>
-        <button type="submit">➕ Add Entry</button>
-    </form>
-
-    <a href="{{ url_for('dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
-</div>
-
-<script>
-const textarea = document.getElementById('journal-content');
-const charCount = document.getElementById('char-count');
-textarea.addEventListener('input', () => {
-    charCount.textContent = `${textarea.value.length} characters`;
-});
-</script>
+    <div class="container">
+        <h1>✍️ Add New Journal Entry</h1>
+        <form action="{{ url_for('add_journal', username=username) }}" method="POST">
+            <input type="text" 
+                   name="title" 
+                   placeholder="Entry Title (optional)" 
+                   maxlength="100">
+            
+            <textarea name="content" 
+                      placeholder="Write your thoughts here..." 
+                      required></textarea>
+            
+            <div class="button-group">
+                <button type="submit">💾 Save Entry</button>
+                <a href="{{ url_for('dashboard') }}" class="back-btn">← Back</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
