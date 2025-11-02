@@ -28,6 +28,24 @@ h1 {
     margin-bottom: 20px;
 }
 
+/* ADD THIS NEW STYLE FOR INPUT */
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 15px;
+    background: #f7f3ee;
+    color: #4e3b2c;
+}
+
+input[type="text"]:focus {
+    border-color: #e8d8b8;
+    box-shadow: 0 0 8px rgba(184,159,130,0.5);
+}
+
 textarea {
     width: 100%;
     padding: 10px;
@@ -37,6 +55,8 @@ textarea {
     min-height: 150px;
     font-size: 16px;
     outline: none;
+    background: #f7f3ee;
+    color: #4e3b2c;
 }
 
 textarea:focus {
@@ -85,8 +105,18 @@ button:hover {
     <h1>Update Journal Entry</h1>
 
     <form method="POST">
-        <textarea name="content">{{ journal['content'] }}</textarea>
-        <button type="submit">Update</button>
+
+    <!-- THIS IS THE FIXED LINE - ADDING THE ACTION ATTRIBUTE -->
+    <form method="POST" action="{{ url_for('update_journal', username=username, id=journal['id']) }}">
+        <!-- ADD THIS INPUT FIELD FOR TITLE -->
+        <input type="text" 
+               name="title" 
+               value="{{ journal['title'] if journal['title'] else '' }}"
+               placeholder="Entry Title (optional)" 
+               maxlength="100">
+        
+        <textarea name="content" required>{{ journal['content'] }}</textarea>
+        <button type="submit">💾 Update Entry</button>
     </form>
 
     <a href="{{ url_for('view_journal', username=username) }}" class="back-btn">⬅ Back to Journal</a>
