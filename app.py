@@ -2,9 +2,27 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import sqlite3, os, random
 from functools import wraps
 from io import StringIO
+from io import BytesIO
+from datetime import datetime
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# PDF generation imports
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+# Email Configuration
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_ADDRESS = 'your_email@gmail.com'  # Change this
+EMAIL_PASSWORD = 'your_app_password'    # Change this
 
 # ---------------- DATABASE ----------------
 DATABASE = os.path.join('instance', 'users.db')
@@ -70,8 +88,25 @@ def init_db():
         )''')
     conn.commit()
     conn.close()
+def update_database():
+    """Add title column to journals table if it doesn't exist"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(journals)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'title' not in columns:
+            cursor.execute('ALTER TABLE journals ADD COLUMN title TEXT DEFAULT "Untitled"')
+            conn.commit()
+            print("Title column added successfully!")
+    except Exception as e:
+        print(f"Error updating database: {e}")
+    finally:
+        conn.close()
 
 init_db()
+update_database()  #  LINE
 
 # ---------------- HELPERS ----------------
 def login_required(f):
@@ -110,6 +145,127 @@ def create_notification(user_id, message):
     conn.execute('INSERT INTO notifications (user_id, message) VALUES (?, ?)', (user_id, message))
     conn.commit()
     conn.close()
+
+def send_email(to_email, subject, body):
+    """Send email using SMTP"""
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = EMAIL_ADDRESS
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+        
+        server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+        server.starttls()
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        text = msg.as_string()
+        server.sendmail(EMAIL_ADDRESS, to_email, text)
+        server.quit()
+        return True
+    except Exception as e:
+        print(f"Email error: {e}")
+        return False
+
+def generate_journal_pdf(journals, username):
+    """Generate PDF from journal entries"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                          rightMargin=72, leftMargin=72,
+                          topMargin=72, bottomMargin=18)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title style
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'],
+                                fontSize=24, textColor='darkblue',
+                                spaceAfter=30, alignment=TA_CENTER)
+    
+    # Entry title style - ADD THIS
+    entry_title_style = ParagraphStyle('EntryTitle', parent=styles['Heading2'],
+                                      fontSize=16, textColor='navy',
+                                      spaceAfter=6, spaceBefore=12)
+    
+    # Body style
+    body_style = ParagraphStyle('CustomBody', parent=styles['BodyText'],
+                               fontSize=11, spaceAfter=12, alignment=TA_LEFT)
+    
+    # Add title
+    title = Paragraph(f"Journal Entries - {username}", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 0.2*inch))
+    
+    # Add generation date
+    date_text = Paragraph(f"Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", 
+                         styles['Normal'])
+    elements.append(date_text)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # REPLACE THE OLD LOOP WITH THIS NEW ONE ↓↓↓
+    for i, journal in enumerate(journals, 1):
+        # FIX: Replace .get() with direct access
+        title = journal['title'] if journal['title'] else 'Untitled'
+        entry_title = Paragraph(f"<b>{title}</b>", entry_title_style)
+        elements.append(entry_title)
+        
+        # Add date
+        date_para = Paragraph(f"<i>{journal['created_at']}</i>", styles['Italic'])
+        elements.append(date_para)
+        elements.append(Spacer(1, 0.1*inch))
+        
+        # Add content
+        content = journal['content'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        content = content.replace('\n', '<br/>')
+        entry_content = Paragraph(content, body_style)
+        elements.append(entry_content)
+        elements.append(Spacer(1, 0.3*inch))
+    
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+def generate_single_entry_pdf(journal, username):
+    """Generate PDF for a single journal entry"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                          rightMargin=72, leftMargin=72,
+                          topMargin=72, bottomMargin=18)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title style
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'],
+                                fontSize=24, textColor='darkblue',
+                                spaceAfter=30, alignment=TA_CENTER)
+    
+    # Entry title style
+    entry_title_style = ParagraphStyle('EntryTitle', parent=styles['Heading2'],
+                                      fontSize=16, textColor='navy',
+                                      spaceAfter=6, spaceBefore=12)
+    
+    # Body style
+    body_style = ParagraphStyle('CustomBody', parent=styles['BodyText'],
+                               fontSize=11, spaceAfter=12, alignment=TA_LEFT)
+    
+    # Add title
+    # FIX: Replace .get() with direct access
+    title = journal['title'] if journal['title'] else 'Untitled'
+    entry_title = Paragraph(f"<b>{title}</b>", entry_title_style)
+    elements.append(entry_title)
+    
+    # Add date
+    date_para = Paragraph(f"<i>{journal['created_at']}</i>", styles['Italic'])
+    elements.append(date_para)
+    elements.append(Spacer(1, 0.1*inch))
+    
+    # Add content
+    content = journal['content'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    content = content.replace('\n', '<br/>')
+    entry_content = Paragraph(content, body_style)
+    elements.append(entry_content)
+    
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
 
 # ---------------- ROUTES ----------------
 @app.route('/')
@@ -153,9 +309,29 @@ def forgot_password():
     if request.method=='POST':
         email = request.form['email']
         user = get_user_by_email(email)
-        if not user: flash('Email not found!', 'error'); return redirect(url_for('forgot_password'))
-        session['otp'], session['username'] = str(random.randint(100000,999999)), user['username']
-        flash(f'Your OTP (testing): {session["otp"]}','info')
+        if not user: 
+            flash('Email not found!', 'error')
+            return redirect(url_for('forgot_password'))
+        
+        otp = str(random.randint(100000, 999999))
+        session['otp'] = otp
+        session['reset_username'] = user['username']
+        
+        subject = "Password Reset OTP - Journal App"
+        body = f"""Hello {user['username']},
+
+Your OTP for password reset is: {otp}
+
+This OTP is valid for 10 minutes.
+
+Best regards,
+Journal App Team"""
+        
+        if send_email(email, subject, body):
+            flash('OTP has been sent to your email!', 'success')
+        else:
+            flash(f'Email service unavailable. Your OTP is: {otp}', 'warning')
+        
         return redirect(url_for('reset_password'))
     return render_template('forgot_password.html')
 
@@ -165,13 +341,17 @@ def reset_password():
         otp, new_pass = request.form['otp'], request.form['new_password']
         if otp==session.get('otp'):
             conn = get_db_connection()
-            conn.execute('UPDATE users SET password=? WHERE username=?',(new_pass,session['username']))
-            conn.commit(); conn.close()
-            flash('Password reset!', 'success')
-            session.pop('otp'); session.pop('username')
+            conn.execute('UPDATE users SET password=? WHERE username=?',
+                        (new_pass, session['reset_username']))  # Changed from session['username']
+            conn.commit()
+            conn.close()
+            flash('Password reset successful!', 'success')
+            session.pop('otp', None)
+            session.pop('reset_username', None)
             return redirect(url_for('login'))
         flash('Invalid OTP.', 'error')
     return render_template('reset_password.html')
+    
 
 @app.route('/dashboard')
 @login_required
@@ -193,31 +373,47 @@ def logout():
     return redirect(url_for('login'))
 
 # ---------------- Journals ----------------
-@app.route('/add_journal', methods=['POST'])
-@login_required
-def add_journal():
-    content = request.form.get('content','')
-    if content:
-        user_id = get_user_id(session['username'])
-        conn = get_db_connection()
-        conn.execute('INSERT INTO journals (user_id,content) VALUES (?,?)',(user_id,content))
-        conn.commit(); conn.close()
-        create_notification(user_id, "✅ New journal entry added successfully.")
-        flash('Journal added!', 'success')
-    return redirect(url_for('dashboard'))
 
-@app.route('/add_journal_page/<username>')
+@app.route('/add_journal/<username>', methods=['GET', 'POST'])
 @login_required
-def add_journal_page(username):
-    if session['username']!=username: flash('Access denied','error'); return redirect(url_for('login'))
+def add_journal(username):
+    # Check if the logged-in user matches the username in the URL
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    # Handle POST request (form submission)
+    if request.method == 'POST':
+        title = request.form.get('title', 'Untitled')
+        content = request.form.get('content', '')
+        
+        if content:
+            user_id = get_user_id(username)
+            conn = get_db_connection()
+            conn.execute('INSERT INTO journals (user_id, title, content) VALUES (?,?,?)',
+                        (user_id, title, content))
+            conn.commit()
+            conn.close()
+            
+            create_notification(user_id, "✅ New journal entry added successfully.")
+            flash('Journal added!', 'success')
+            return redirect(url_for('view_journal', username=username))  # Changed from dashboard
+        else:
+            flash('Content cannot be empty!', 'error')
+    
+    # Handle GET request (display the form)
     return render_template('add_journal.html', username=username)
+
 
 @app.route('/view_journal/<username>')
 @login_required
 def view_journal(username):
-    if session['username']!=username: flash('Access denied','error'); return redirect(url_for('login'))
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
     conn = get_db_connection()
-    journals = conn.execute('SELECT * FROM journals WHERE user_id=?',(get_user_id(username),)).fetchall()
+    journals = conn.execute('SELECT * FROM journals WHERE user_id=? ORDER BY created_at DESC', (get_user_id(username),)).fetchall()
     conn.close()
     return render_template('view_journal.html', journals=journals, username=username)
 
@@ -232,49 +428,209 @@ def search_journal(username):
     if not results:
         flash('No matching entries found.', 'info')
     return render_template('search_journal.html', results=results, username=username)
-
-@app.route('/update_journal/<int:id>', methods=['GET','POST'])
+# REPLACE THIS ENTIRE FUNCTION:
+@app.route('/update_journal/<username>/<int:id>', methods=['GET','POST'])
 @login_required
-def update_journal(id):
+def update_journal(username, id):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
     conn = get_db_connection()
-    journal = conn.execute('SELECT * FROM journals WHERE id=?',(id,)).fetchone()
-    if not journal or journal['user_id']!=get_user_id(session['username']):
-        conn.close(); flash('Access denied or not found','error'); return redirect(url_for('dashboard'))
-    if request.method=='POST':
-        conn.execute('UPDATE journals SET content=? WHERE id=?',(request.form['content'],id))
-        conn.commit(); conn.close()
-        create_notification(get_user_id(session['username']), "✏️ You edited one of your journal entries.")
-        flash('Journal updated!','success')
-        return redirect(url_for('view_journal', username=session['username']))
+    journal = conn.execute('SELECT * FROM journals WHERE id=?', (id,)).fetchone()
+    if not journal or journal['user_id'] != get_user_id(username):
+        conn.close()
+        flash('Access denied or not found', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        title = request.form.get('title', 'Untitled')
+        content = request.form['content']
+        conn.execute('UPDATE journals SET title=?, content=? WHERE id=?',
+                    (title, content, id))
+        conn.commit()
+        conn.close()
+        create_notification(get_user_id(username), 
+                          "✏️ You edited one of your journal entries.")
+        flash('Journal updated!', 'success')
+        return redirect(url_for('view_journal', username=username))
+    
     conn.close()
-    return render_template('update_journal.html', journal=journal, username=session['username'])
+    return render_template('update_journal.html', journal=journal, username=username)
 
-@app.route('/delete_journal/<int:id>', methods=['POST'])
+@app.route('/delete_journal/<username>/<int:id>', methods=['POST'])
 @login_required
-def delete_journal(id):
+def delete_journal(username, id):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
     conn = get_db_connection()
-    journal = conn.execute('SELECT * FROM journals WHERE id=?',(id,)).fetchone()
-    if not journal or journal['user_id']!=get_user_id(session['username']):
-        conn.close(); flash('Access denied or not found','error'); return redirect(url_for('dashboard'))
-    conn.execute('DELETE FROM journals WHERE id=?',(id,))
-    conn.commit(); conn.close()
-    create_notification(get_user_id(session['username']), "❌ A journal entry was deleted.")
-    flash('Journal deleted!','success')
-    return redirect(url_for('view_journal', username=session['username']))
-
-@app.route('/export_journal')
-@login_required
-def export_journal():
-    username = session['username']
-    conn = get_db_connection()
-    journals = conn.execute('SELECT * FROM journals WHERE user_id=? ORDER BY created_at ASC',(get_user_id(username),)).fetchall()
+    journal = conn.execute('SELECT * FROM journals WHERE id=?', (id,)).fetchone()
+    if not journal or journal['user_id'] != get_user_id(username):
+        conn.close()
+        flash('Access denied or not found', 'error')
+        return redirect(url_for('dashboard'))
+    
+    conn.execute('DELETE FROM journals WHERE id=?', (id,))
+    conn.commit()
     conn.close()
-    if not journals: flash('No entries to export','info'); return redirect(url_for('dashboard'))
+    create_notification(get_user_id(username), "❌ A journal entry was deleted.")
+    flash('Journal deleted!', 'success')
+    return redirect(url_for('view_journal', username=username))
+
+@app.route('/search_entry/<username>', methods=['GET', 'POST'])
+@login_required
+def search_entry(username):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        search_title = request.form.get('search_title', '').strip()
+        if not search_title:
+            flash('Please enter a title to search', 'error')
+            return render_template('search_entry.html', username=username)
+        
+        conn = get_db_connection()
+        # Search for entries with titles containing the search term
+        journals = conn.execute(
+            'SELECT * FROM journals WHERE user_id=? AND LOWER(title) LIKE ?',
+            (get_user_id(username), f'%{search_title.lower()}%')
+        ).fetchall()
+        conn.close()
+        
+        if not journals:
+            flash('No entries found with that title', 'info')
+            return render_template('search_entry.html', username=username)
+        
+        return render_template('search_entry.html', username=username, journals=journals, search_term=search_title)
+    
+    return render_template('search_entry.html', username=username)
+
+@app.route('/export_journal/<username>')
+@login_required
+def export_journal(username):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    journals = conn.execute('SELECT * FROM journals WHERE user_id=? ORDER BY created_at ASC',
+                          (get_user_id(username),)).fetchall()
+    conn.close()
+    
+    if not journals: 
+        flash('No entries to export', 'info')
+        return redirect(url_for('view_journal', username=username)) # IMPROVED: Redirect to view_journal
+    
+    from io import StringIO
     file_data = StringIO()
     file_data.write(f"Journal Entries for {username}\n\n")
-    for i,e in enumerate(journals,1): file_data.write(f"Entry {i} - {e['created_at']}\n{e['content']}\n\n")
+    for i, e in enumerate(journals, 1): 
+        title = e['title'] if e['title'] else 'Untitled'
+        # FIXED: Added the title to the output
+        file_data.write(f"Entry {i} - {e['created_at']} - {title}\n{e['content']}\n\n")
     file_data.seek(0)
-    return send_file(file_data, as_attachment=True, download_name=f"{username}_journal.txt", mimetype='text/plain')
+
+    return send_file(
+        BytesIO(file_data.getvalue().encode()), 
+        as_attachment=True, 
+        download_name=f"{username}_journal.txt", 
+        mimetype='text/plain'
+    )
+
+@app.route('/export_journal_pdf/<username>')
+@login_required
+def export_journal_pdf(username):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    journals = conn.execute('SELECT * FROM journals WHERE user_id=? ORDER BY created_at ASC',
+                          (get_user_id(username),)).fetchall()
+    conn.close()
+    
+    if not journals: 
+        flash('No entries to export', 'info')
+        return redirect(url_for('view_journal', username=username))
+    
+    pdf_buffer = generate_journal_pdf(journals, username)
+    create_notification(get_user_id(username), "📄 Journal exported to PDF successfully.")
+    
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"{username}_journal_{datetime.now().strftime('%Y%m%d')}.pdf",
+        mimetype='application/pdf'
+    )
+
+@app.route('/export_single_entry_txt/<username>/<int:entry_id>')
+@login_required
+def export_single_entry_txt(username, entry_id):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    journal = conn.execute('SELECT * FROM journals WHERE id=? AND user_id=?', 
+                          (entry_id, get_user_id(username))).fetchone()
+    conn.close()
+    
+    if not journal:
+        flash('Entry not found', 'error')
+        return redirect(url_for('view_journal', username=username))
+    
+    from io import StringIO
+    file_data = StringIO()
+    title = journal['title'] if journal['title'] else 'Untitled'
+    file_data.write(f"Journal Entry: {title}\n\n")
+    file_data.write(f"Date: {journal['created_at']}\n\n")
+    file_data.write(f"Content:\n{journal['content']}\n")
+    file_data.seek(0)
+    
+    # Create a safe filename from the title
+    safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+    safe_title = safe_title.replace(' ', '_')
+    
+    return send_file(
+        BytesIO(file_data.getvalue().encode()), 
+        as_attachment=True, 
+        download_name=f"{safe_title}.txt", 
+        mimetype='text/plain'
+    )
+
+@app.route('/export_single_entry_pdf/<username>/<int:entry_id>')
+@login_required
+def export_single_entry_pdf(username, entry_id):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    journal = conn.execute('SELECT * FROM journals WHERE id=? AND user_id=?', 
+                          (entry_id, get_user_id(username))).fetchone()
+    conn.close()
+    
+    if not journal:
+        flash('Entry not found', 'error')
+        return redirect(url_for('view_journal', username=username))
+    
+    # Create a safe filename from the title
+    title = journal['title'] if journal['title'] else 'Untitled'
+    safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+    safe_title = safe_title.replace(' ', '_')
+    
+    # Generate PDF for a single entry
+    pdf_buffer = generate_single_entry_pdf(journal, username)
+    
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"{safe_title}.pdf",
+        mimetype='application/pdf'
+    )
 
 # ---------------- Settings ----------------
 @app.route('/settings/<username>', methods=['GET','POST'])
