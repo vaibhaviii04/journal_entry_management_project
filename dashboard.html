@@ -72,7 +72,7 @@ html, body {
 
 /* ===================== Search Bar ===================== */
 .search-bar-container {
-    margin-top: 35px;
+    margin-top: 20px;  /* Changed from 35px to 20px to move it up */
     display: flex;
     justify-content: center;
     width: 100%;
@@ -171,15 +171,15 @@ html, body {
 
 /* ===================== Add Entry Button ===================== */
 .main-action {
-    margin-top: 60px;
+    margin-top: 30px;  /* Changed from 60px to 30px to move it up */
     display: flex;
     justify-content: center;
 }
 
 .main-action a.button-add {
-    padding: 20px 45px;
-    font-size: 26px;
-    border-radius: 12px;
+    padding: 15px 40px;  /* Changed from 20px 45px to make it more rectangular */
+    font-size: 22px;     /* Changed from 26px */
+    border-radius: 8px;  /* Changed from 12px to make it more rectangular */
     border: 1px solid #debba1;
     background: #f7f3ee;
     color: #4e3b2c;
@@ -190,7 +190,7 @@ html, body {
 
 .main-action a.button-add:hover {
     transform: scale(1.05);
-    background: #e8e2d8;
+    background: #e8d8b8;
 }
 
 /* ===================== Logout Button ===================== */
@@ -297,7 +297,7 @@ html, body {
       <a href="{{ url_for('reminders', username=username) }}">⏰ Reminders</a>
       <a href="{{ url_for('profile', username=username) }}">👤 Profile</a>
       <a href="{{ url_for('calendar', username=username) }}">📅 Calendar</a>
-      <a href="{{ url_for('export_journal') }}" class="button-export">📄 Export Journal</a>
+     <a href="{{ url_for('export_journal', username=username) }}" class="button-export">📄 Export Journal</a>
     </div>
 
     <div class="welcome-text" id="welcome-text"></div>
@@ -312,7 +312,7 @@ html, body {
 
     <!-- Add Entry Button -->
     <div class="main-action">
-      <a href="{{ url_for('add_journal_page', username=username) }}" class="button-add">➕ Add Entry ✍️</a>
+      <a href="{{ url_for('add_journal', username=username) }}" class="button-add">➕ Add Entry ✍️</a>
     </div>
 
     <!-- Logout Button -->
