@@ -88,6 +88,7 @@ def init_db():
         )''')
     conn.commit()
     conn.close()
+
 def update_database():
     """Add title column to journals table if it doesn't exist"""
     conn = get_db_connection()
@@ -105,8 +106,44 @@ def update_database():
     finally:
         conn.close()
 
+def update_journal_privacy_column():
+    """Add is_private column to journals table if it doesn't exist"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(journals)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'is_private' not in columns:
+            cursor.execute('ALTER TABLE journals ADD COLUMN is_private INTEGER DEFAULT 0')
+            conn.commit()
+            print("is_private column added successfully!")
+    except Exception as e:
+        print(f"Error updating database: {e}")
+    finally:
+        conn.close()
+
+def update_journal_password_column():
+    """Add password column to journals table if it doesn't exist"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(journals)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'password' not in columns:
+            cursor.execute('ALTER TABLE journals ADD COLUMN password TEXT')
+            conn.commit()
+            print("password column added successfully!")
+    except Exception as e:
+        print(f"Error updating database: {e}")
+    finally:
+        conn.close()
+
 init_db()
-update_database()  #  LINE
+update_database()
+update_journal_privacy_column()
+update_journal_password_column()
 
 # ---------------- HELPERS ----------------
 def login_required(f):
@@ -121,6 +158,12 @@ def login_required(f):
 def get_user(username):
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM users WHERE username=?', (username,)).fetchone()
+    conn.close()
+    return user
+
+def get_user_by_email(email):
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email=?',(email,)).fetchone()
     conn.close()
     return user
 
@@ -180,7 +223,7 @@ def generate_journal_pdf(journals, username):
                                 fontSize=24, textColor='darkblue',
                                 spaceAfter=30, alignment=TA_CENTER)
     
-    # Entry title style - ADD THIS
+    # Entry title style
     entry_title_style = ParagraphStyle('EntryTitle', parent=styles['Heading2'],
                                       fontSize=16, textColor='navy',
                                       spaceAfter=6, spaceBefore=12)
@@ -200,7 +243,7 @@ def generate_journal_pdf(journals, username):
     elements.append(date_text)
     elements.append(Spacer(1, 0.3*inch))
     
-    # REPLACE THE OLD LOOP WITH THIS NEW ONE ↓↓↓
+    # Loop through journals
     for i, journal in enumerate(journals, 1):
         # FIX: Replace .get() with direct access
         title = journal['title'] if journal['title'] else 'Untitled'
@@ -286,12 +329,6 @@ def register():
             return redirect(url_for('login'))
     return render_template('register.html')
 
-def get_user_by_email(email):
-    conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE email=?',(email,)).fetchone()
-    conn.close()
-    return user
-
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method=='POST':
@@ -342,7 +379,7 @@ def reset_password():
         if otp==session.get('otp'):
             conn = get_db_connection()
             conn.execute('UPDATE users SET password=? WHERE username=?',
-                        (new_pass, session['reset_username']))  # Changed from session['username']
+                        (new_pass, session['reset_username']))
             conn.commit()
             conn.close()
             flash('Password reset successful!', 'success')
@@ -351,7 +388,6 @@ def reset_password():
             return redirect(url_for('login'))
         flash('Invalid OTP.', 'error')
     return render_template('reset_password.html')
-    
 
 @app.route('/dashboard')
 @login_required
@@ -386,24 +422,26 @@ def add_journal(username):
     if request.method == 'POST':
         title = request.form.get('title', 'Untitled')
         content = request.form.get('content', '')
+        is_private = 1 if request.form.get('is_private') else 0
+        password = request.form.get('password', '') if is_private else ''
         
         if content:
             user_id = get_user_id(username)
             conn = get_db_connection()
-            conn.execute('INSERT INTO journals (user_id, title, content) VALUES (?,?,?)',
-                        (user_id, title, content))
+            conn.execute('INSERT INTO journals (user_id, title, content, is_private, password) VALUES (?,?,?,?,?)',
+                        (user_id, title, content, is_private, password))
             conn.commit()
             conn.close()
             
-            create_notification(user_id, "✅ New journal entry added successfully.")
+            privacy_msg = "🔒 Private" if is_private else "📖 Public"
+            create_notification(user_id, f"✅ New {privacy_msg} journal entry added.")
             flash('Journal added!', 'success')
-            return redirect(url_for('view_journal', username=username))  # Changed from dashboard
+            return redirect(url_for('view_journal', username=username))
         else:
             flash('Content cannot be empty!', 'error')
     
     # Handle GET request (display the form)
     return render_template('add_journal.html', username=username)
-
 
 @app.route('/view_journal/<username>')
 @login_required
@@ -413,9 +451,34 @@ def view_journal(username):
         return redirect(url_for('login'))
     
     conn = get_db_connection()
-    journals = conn.execute('SELECT * FROM journals WHERE user_id=? ORDER BY created_at DESC', (get_user_id(username),)).fetchall()
+    journals = conn.execute('SELECT * FROM journals WHERE user_id=? ORDER BY created_at DESC', 
+                          (get_user_id(username),)).fetchall()
     conn.close()
-    return render_template('view_journal.html', journals=journals, username=username)
+    return render_template('view_journal.html', journals=journals, username=username, filter='all')
+
+@app.route('/view_journal/<username>/private')
+@login_required
+def view_private_journal(username):
+    if session['username'] != username: 
+        flash('Access denied','error')
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    journals = conn.execute('SELECT * FROM journals WHERE user_id=? AND is_private=1',
+                          (get_user_id(username),)).fetchall()
+    conn.close()
+    return render_template('view_journal.html', journals=journals, username=username, filter='private')
+
+@app.route('/view_journal/<username>/public')
+@login_required
+def view_public_journal(username):
+    if session['username'] != username: 
+        flash('Access denied','error')
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    journals = conn.execute('SELECT * FROM journals WHERE user_id=? AND is_private=0',
+                          (get_user_id(username),)).fetchall()
+    conn.close()
+    return render_template('view_journal.html', journals=journals, username=username, filter='public')
 
 @app.route('/search_journal/<username>', methods=['GET'])
 @login_required
@@ -428,7 +491,7 @@ def search_journal(username):
     if not results:
         flash('No matching entries found.', 'info')
     return render_template('search_journal.html', results=results, username=username)
-# REPLACE THIS ENTIRE FUNCTION:
+
 @app.route('/update_journal/<username>/<int:id>', methods=['GET','POST'])
 @login_required
 def update_journal(username, id):
@@ -446,8 +509,17 @@ def update_journal(username, id):
     if request.method == 'POST':
         title = request.form.get('title', 'Untitled')
         content = request.form['content']
-        conn.execute('UPDATE journals SET title=?, content=? WHERE id=?',
-                    (title, content, id))
+        is_private = 1 if request.form.get('is_private') else 0
+        password = request.form.get('password', '')
+        
+        # Get current password if not provided
+        if not password and is_private:
+            current_password = journal['password'] if journal else ''
+        else:
+            current_password = password
+        
+        conn.execute('UPDATE journals SET title=?, content=?, is_private=?, password=? WHERE id=?',
+                    (title, content, is_private, current_password, id))
         conn.commit()
         conn.close()
         create_notification(get_user_id(username), 
@@ -522,15 +594,15 @@ def export_journal(username):
     
     if not journals: 
         flash('No entries to export', 'info')
-        return redirect(url_for('view_journal', username=username)) # IMPROVED: Redirect to view_journal
+        return redirect(url_for('view_journal', username=username))
     
     from io import StringIO
     file_data = StringIO()
     file_data.write(f"Journal Entries for {username}\n\n")
     for i, e in enumerate(journals, 1): 
         title = e['title'] if e['title'] else 'Untitled'
-        # FIXED: Added the title to the output
-        file_data.write(f"Entry {i} - {e['created_at']} - {title}\n{e['content']}\n\n")
+        privacy = "Private" if e['is_private'] else "Public"
+        file_data.write(f"Entry {i} - {e['created_at']} - {title} ({privacy})\n{e['content']}\n\n")
     file_data.seek(0)
 
     return send_file(
@@ -585,7 +657,8 @@ def export_single_entry_txt(username, entry_id):
     from io import StringIO
     file_data = StringIO()
     title = journal['title'] if journal['title'] else 'Untitled'
-    file_data.write(f"Journal Entry: {title}\n\n")
+    privacy = "Private" if journal['is_private'] else "Public"
+    file_data.write(f"Journal Entry: {title} ({privacy})\n\n")
     file_data.write(f"Date: {journal['created_at']}\n\n")
     file_data.write(f"Content:\n{journal['content']}\n")
     file_data.seek(0)
@@ -631,6 +704,61 @@ def export_single_entry_pdf(username, entry_id):
         download_name=f"{safe_title}.pdf",
         mimetype='application/pdf'
     )
+
+# Add these new routes for private entry functionality
+@app.route('/unlock_entry/<username>/<int:entry_id>', methods=['GET', 'POST'])
+@login_required
+def unlock_entry(username, entry_id):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    journal = conn.execute('SELECT * FROM journals WHERE id=? AND user_id=?', 
+                          (entry_id, get_user_id(username))).fetchone()
+    conn.close()
+    
+    if not journal:
+        flash('Entry not found', 'error')
+        return redirect(url_for('view_journal', username=username))
+    
+    if not journal['is_private']:
+        # If not private, redirect to view page
+        return redirect(url_for('view_single_entry', username=username, entry_id=entry_id))
+    
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        if password == journal['password']:
+            # Store unlock in session temporarily
+            session[f'unlocked_{entry_id}'] = True
+            flash('Entry unlocked successfully!', 'success')
+            return redirect(url_for('view_single_entry', username=username, entry_id=entry_id))
+        else:
+            flash('Incorrect password!', 'error')
+    
+    return render_template('unlock_entry.html', journal=journal, username=username)
+
+@app.route('/view_single_entry/<username>/<int:entry_id>')
+@login_required
+def view_single_entry(username, entry_id):
+    if session['username'] != username:
+        flash('Access denied', 'error')
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    journal = conn.execute('SELECT * FROM journals WHERE id=? AND user_id=?', 
+                          (entry_id, get_user_id(username))).fetchone()
+    conn.close()
+    
+    if not journal:
+        flash('Entry not found', 'error')
+        return redirect(url_for('view_journal', username=username))
+    
+    # Check if private and not unlocked
+    if journal['is_private'] and not session.get(f'unlocked_{entry_id}'):
+        return redirect(url_for('unlock_entry', username=username, entry_id=entry_id))
+    
+    return render_template('view_single_entry.html', journal=journal, username=username)
 
 # ---------------- Settings ----------------
 @app.route('/settings/<username>', methods=['GET','POST'])
