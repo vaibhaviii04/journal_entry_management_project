@@ -400,14 +400,17 @@ def dashboard():
     conn.close()
     settings = get_settings(user_id)
     return render_template('dashboard.html', username=username, journals=journals, theme=settings['theme'], notifications=notifications)
-
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
-    session.pop('username')
+    # Clear all unlock flags for private entries
+    keys_to_remove = [key for key in session.keys() if key.startswith('unlocked_')]
+    for key in keys_to_remove:
+        session.pop(key, None)
+    
+    session.pop('username', None)
     flash('Logged out.', 'success')
     return redirect(url_for('login'))
-
 # ---------------- Journals ----------------
 
 @app.route('/add_journal/<username>', methods=['GET', 'POST'])
