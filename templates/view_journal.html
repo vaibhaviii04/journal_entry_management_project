@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>View Journal Entries</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    color: #f7f3ee;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 20px;
+    color: #f7f3ee;
+    font-size: 28px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.container {
+    max-width: 1200px;  /* Increased width for horizontal layout */
+    width: 95%;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.entries-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));  /* Horizontal grid layout */
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.entry {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: left;
+    border-left: 4px solid #debba1;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;  /* Fixed height for consistency */
+}
+
+.entry:hover {
+    transform: translateY(-3px);
+}
+
+.entry p {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    flex-grow: 1;  /* Allow content to expand */
+}
+
+/* Base style for both buttons */
+.action-btn {
+    padding: 8px 16px;
+    margin: 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 500;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    min-width: 80px;  /* Ensure consistent button width */
+}
+
+/* Edit button */
+.update-btn {
+    background: #debba1;
+    color: #4e3b2c;
+}
+.update-btn:hover {
+    background: #e8d8b8;
+    transform: scale(1.05);
+}
+
+/* Delete button */
+.delete-btn {
+    background: #d9534f;
+    color: white;
+}
+.delete-btn:hover {
+    background: #c9302c;
+    transform: scale(1.05);
+}
+
+/* Unlock button */
+.unlock-btn {
+    background: #5bc0de;
+    color: white;
+}
+.unlock-btn:hover {
+    background: #46b8da;
+    transform: scale(1.05);
+}
+
+/* View button */
+.view-btn {
+    background: #5cb85c;
+    color: white;
+}
+.view-btn:hover {
+    background: #4cae4c;
+    transform: scale(1.05);
+}
+
+/* Export buttons - NEW */
+.export-buttons {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    display: inline-block;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-weight: 500;
+}
+
+.export-txt {
+    background: #5cb85c;
+    color: white;
+}
+
+.export-txt:hover {
+    background: #4cae4c;
+    transform: scale(1.05);
+}
+
+.export-pdf {
+    background: #0275d8;
+    color: white;
+}
+
+.export-pdf:hover {
+    background: #025aa5;
+    transform: scale(1.05);
+}
+
+/* Filter buttons - ADDED */
+.filter-buttons {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.filter-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 0 5px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #f7f3ee;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: #debba1;
+    color: #4e3b2c;
+    font-weight: bold;
+    border-color: #debba1;
+}
+
+/* Privacy indicator - ADDED */
+.private-indicator {
+    color: #d9534f;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Entry actions - UPDATED */
+.entry-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    justify-content: flex-start;  /* Align buttons to the left */
+    align-items: center;  /* Vertically align buttons */
+    flex-wrap: wrap;  /* Allow wrapping if needed */
+}
+
+/* Back button */
+.back-btn {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    background: #8f7455;
+    color: #f7f3ee;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: 0.3s;
+    border: none;
+}
+
+.back-btn:hover {
+    background: #7a6447;
+    transform: translateY(-2px);
+}
+
+/* Entry title styling */
+.entry-title {
+    margin: 0 0 8px 0;
+    color: #debba1;
+    font-size: 20px;
+}
+
+/* Entry date styling */
+.entry-date {
+    font-size: 13px;
+    color: #ccc;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Entry content styling */
+.entry-content {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;  /* Limit to 3 lines */
+    -webkit-box-orient: vertical;
+}
+
+/* Locked content styling */
+.locked-content {
+    color: #ccc;
+    font-style: italic;
+    margin: 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Password field styling */
+.password-container {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.password-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #debba1;
+    background: rgba(255, 255, 255, 0.9);
+    color: #4e3b2c;
+    font-size: 14px;
+}
+
+.unlock-form-btn {
+    padding: 8px 15px;
+    background: #5bc0de;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;  /* Match other buttons */
+}
+
+.unlock-form-btn:hover {
+    background: #46b8da;
+}
+
+/* Entry header */
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.entry-title-section {
+    flex: 1;
+}
+
+.entry-date-section {
+    text-align: right;
+}
+
+/* Button container for better alignment */
+.button-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .entries-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .container {
+        max-width: 100%;
+        width: 95%;
+    }
+    
+    .entry-actions {
+        justify-content: center;  /* Center buttons on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .entry {
+        padding: 15px;
+        min-height: 180px;
+    }
+    
+    .entry-title {
+        font-size: 18px;
+    }
+    
+    .entry-content {
+        font-size: 14px;
+        -webkit-line-clamp: 2;
+    }
+    
+    .action-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+        min-width: 70px;
+    }
+}
+</style>
+</head>
+<body>
+    <h1>Your Journal Entries</h1>
+
+    <!-- Filter buttons - ADDED -->
+    <div class="filter-buttons">
+        <a href="{{ url_for('view_journal', username=username) }}" class="filter-btn {% if not filter or filter == 'all' %}active{% endif %}">All Entries</a>
+        <a href="{{ url_for('view_private_journal', username=username) }}" class="filter-btn {% if filter == 'private' %}active{% endif %}">Private Entries</a>
+        <a href="{{ url_for('view_public_journal', username=username) }}" class="filter-btn {% if filter == 'public' %}active{% endif %}">Public Entries</a>
+    </div>
+
+    <!-- ADD EXPORT BUTTONS HERE -->
+    {% if journals %}
+    <!-- Export buttons -->
+<div class="export-buttons">
+        <a href="{{ url_for('search_entry', username=username) }}" class="export-btn export-txt">🔍 Search Entry</a>
+     <a href="{{ url_for('export_journal', username=username) }}" class="export-btn export-txt">📄 Export as TXT</a>
+     <a href="{{ url_for('export_journal_pdf', username=username) }}" class="export-btn export-pdf">📑 Export as PDF</a>
+</div>
+    {% endif %}
+
+  <div class="container">
+    {% if journals %}
+        <div class="entries-grid">
+            {% for journal in journals %}
+                <div class="entry">
+                    <!-- Entry header with title and date -->
+                    <div class="entry-header">
+                        <div class="entry-title-section">
+                            <!-- Privacy indicator - ADDED -->
+                            {% if journal['is_private'] %}
+                                <div class="private-indicator">
+                                    <span>🔒</span> Private
+                                </div>
+                            {% endif %}
+                            
+                            <h3 class="entry-title">
+                                {{ journal['title'] if journal['title'] else 'Untitled' }}
+                            </h3>
+                        </div>
+                        
+                        <div class="entry-date-section">
+                            <div class="entry-date">
+                                <span>📅</span> {{ journal['created_at'] }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Entry content -->
+                    {% if journal['is_private'] %}
+                        <div class="locked-content">
+                            Content is locked. Enter password to unlock.
+                        </div>
+                        
+                        <!-- Password field for private entries -->
+                        <form action="{{ url_for('unlock_entry', username=username, entry_id=journal['id']) }}" method="POST" class="password-container">
+                            <input type="password" 
+                                   name="password" 
+                                   placeholder="Enter password to unlock" 
+                                   class="password-input">
+                            <button type="submit" class="unlock-form-btn">🔓 Unlock</button>
+                        </form>
+                    {% else %}
+                        <p class="entry-content">{{ journal['content'] }}</p>
+                    {% endif %}
+                    
+                    <!-- Entry actions - UPDATED -->
+                    <div class="entry-actions">
+                        <div class="button-container">
+                            {% if journal['is_private'] %}
+                                <a href="{{ url_for('view_single_entry', username=username, entry_id=journal['id']) }}" class="action-btn view-btn">👁️ View</a>
+                            {% endif %}
+                            
+                            <!-- Edit button - PRESERVED -->
+                            <a href="{{ url_for('update_journal', username=username, id=journal['id']) }}" class="action-btn update-btn">✏️ Edit</a>
+                            
+                            <!-- Delete button - PRESERVED -->
+                            <form action="{{ url_for('delete_journal', username=username, id=journal['id']) }}" method="POST" style="display: inline; margin: 0;">
+                                <button type="submit" class="action-btn delete-btn">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No journal entries yet.</p>
+    {% endif %}
+</div>
+
+    <a href="{{ url_for('dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
+</body>
+</html>

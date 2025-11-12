@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journal Entry</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    color: #f7f3ee;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.entry {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.entry p {
+    white-space: pre-wrap;
+}
+
+.private-indicator {
+    color: #d9534f;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+button, .back-btn {
+    padding: 10px 20px;
+    border: 1px solid #debba1;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.edit-btn {
+    background: #debba1;
+    color: #4e3b2c;
+}
+
+.edit-btn:hover {
+    background: #e8d8b8;
+}
+
+.back-btn {
+    background: #8f7455;
+    color: #f7f3ee;
+    border-color: #8f7455;
+}
+
+.back-btn:hover {
+    background: #7a6447;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        {% if journal['is_private'] %}
+            <div class="private-indicator">🔒 Private Entry</div>
+        {% endif %}
+        
+        <h1>{{ journal['title'] if journal['title'] else 'Untitled' }}</h1>
+        
+        <div class="entry">
+            <p style="font-size: 12px; color: #ccc; margin: 0 0 10px 0;">
+                📅 {{ journal['created_at'] }}
+            </p>
+            <p>{{ journal['content'] }}</p>
+        </div>
+        
+        <div class="button-group">
+            <a href="{{ url_for('update_journal', username=username, id=journal['id']) }}" class="edit-btn">✏️ Edit</a>
+            <form action="{{ url_for('delete_journal', username=username, id=journal['id']) }}" method="POST" style="display: inline;">
+                <button type="submit" style="background: #d9534f; color: white;">🗑️ Delete</button>
+            </form>
+            <a href="{{ url_for('view_journal', username=username) }}" class="back-btn">⬅ Back</a>
+        </div>
+    </div>
+</body>
+</html>
