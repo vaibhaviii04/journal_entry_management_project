@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to right, #2d2821, #8f7455);
+    color: #f7f3ee;
+}
+
+.notifications-container {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.notifications-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 28px;
+    animation: fadeInDown 0.8s ease;
+}
+
+/* Remove top options */
+.top-options { display: none; }
+
+.notification-item {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.notification-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.notification-item.unread {
+    border-left: 4px solid #debba1;
+}
+
+.notification-item p {
+    margin: 0;
+    font-size: 15px;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.notification-actions button {
+    padding: 6px 12px;
+    font-size: 13px;
+    border: 1px solid #debba1;
+    border-radius: 8px;
+    background: #f7f3ee;
+    color: #4e3b2c;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.notification-actions button:hover {
+    background: #e8e2d8;
+    transform: scale(1.05);
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 25px;
+    text-decoration: none;
+    color: #4e3b2c;
+    font-weight: bold;
+    transition: all 0.2s ease, transform 0.3s ease;
+}
+
+.back-link:hover {
+    color: #2d2821;
+    transform: scale(1.05);
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="notifications-container">
+    <h2>🔔 Notifications</h2>
+
+    {% if notifications %}
+        {% for notification in notifications %}
+        <div class="notification-item {% if not notification.read %}unread{% endif %}">
+            <p>{{ notification.message }}</p>
+            <div class="notification-actions">
+                {% if not notification.read %}
+                <button onclick="markRead(this)">Mark Read</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align:center; margin-top:20px;">No notifications at the moment.</p>
+    {% endif %}
+
+    <a href="{{ url_for('dashboard', username=username) }}" class="back-link">⬅️ Back to Dashboard</a>
+</div>
+
+<script>
+// Only mark single notification as read
+function markRead(button) {
+    const item = button.closest('.notification-item');
+    item.classList.remove('unread');
+    button.remove();
+}
+</script>
+
+</body>
+</html>

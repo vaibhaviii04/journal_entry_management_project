@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - {{ username }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 20px;
+    background: #f7f3ee;
+    color: #2d2821;
+    transition: background 0.3s, color 0.3s;
+}
+
+h2 {
+    margin-bottom: 20px;
+    animation: fadeInDown 0.8s ease;
+}
+
+.profile-section {
+    border: 1px solid #debba1;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 1s ease;
+}
+
+.profile-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.profile-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    animation: fadeInLeft 0.8s ease;
+}
+
+input[type="text"], input[type="email"], input[type="password"], input[type="file"], textarea, select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #debba1;
+    margin-top: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+    border-color: #b89f82;
+    box-shadow: 0 0 8px rgba(184, 159, 130, 0.4);
+    outline: none;
+}
+
+button {
+    padding: 8px 14px;
+    border: 1px solid #debba1;
+    border-radius: 8px;
+    background: #f7f3ee;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: all 0.2s ease, transform 0.3s ease;
+}
+
+button:hover {
+    background: #e8e2d8;
+    transform: scale(1.08) rotate(-1deg);
+}
+
+.danger-btn {
+    background: #ffcccc;
+    border-color: #ff6666;
+}
+
+.danger-btn:hover {
+    background: #ff9999;
+}
+
+img {
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+img:hover {
+    transform: scale(1.1);
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #4e3b2c;
+    font-weight: bold;
+    transition: all 0.2s ease, transform 0.3s ease;
+}
+
+.back-link:hover {
+    color: #2d2821;
+    transform: scale(1.05) rotate(1deg);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 30px;
+    border: 1px solid #debba1;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    animation: fadeInDown 0.3s ease;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #000;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 500;
+}
+</style>
+</head>
+<body>
+
+<h2>👤 Profile</h2>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div style="padding: 10px; margin-bottom: 15px; border-radius: 8px; background: {% if category == 'success' %}#d4edda{% elif category == 'error' %}#f8d7da{% else %}#d1ecf1{% endif %};">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="profile-section">
+    <h3>User Info</h3>
+    <p><strong>Username:</strong> {{ username }}</p>
+    <p><strong>Email:</strong> {{ email }}</p>
+    <p><strong>Total Journal Entries:</strong> {{ journal_count }}</p>
+    <button onclick="openEditInfoModal()">Edit Info</button>
+</div>
+
+<div class="profile-section">
+    <h3>Profile Picture</h3>
+    <img src="{{ profile_pic_url }}" alt="Profile Picture" width="100">
+    <form action="{{ url_for('upload_profile_picture', username=username) }}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="profile_pic" accept="image/*" required>
+        <button type="submit">Upload Picture</button>
+    </form>
+</div>
+
+<div class="profile-section">
+    <h3>Bio / About Me</h3>
+    <form action="{{ url_for('save_bio', username=username) }}" method="POST">
+        <textarea name="bio" rows="4" placeholder="Write something about yourself...">{{ bio }}</textarea>
+        <button type="submit">Save Bio</button>
+    </form>
+</div>
+
+
+<div class="profile-section">
+    <h3>Preferences</h3>
+    <form action="{{ url_for('update_profile_preferences', username=username) }}" method="POST">
+        <label>
+            Default Journal View:
+            <select name="default_view">
+                <option value="list" {% if default_view == 'list' %}selected{% endif %}>List</option>
+                <option value="calendar" {% if default_view == 'calendar' %}selected{% endif %}>Calendar</option>
+                <option value="grid" {% if default_view == 'grid' %}selected{% endif %}>Grid</option>
+            </select>
+        </label>
+        <button type="submit">Save Preferences</button>
+    </form>
+</div>
+
+<div class="profile-section">
+    <h3>Danger Zone</h3>
+    <button class="danger-btn" onclick="openDeleteModal()">Delete Account</button>
+</div>
+
+<a href="{{ url_for('dashboard') }}" class="back-link">⬅ Back to Dashboard</a>
+
+<!-- Edit Info Modal -->
+<div id="editInfoModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditInfoModal()">&times;</span>
+        <h3>Edit Profile Information</h3>
+        <form action="{{ url_for('edit_profile_info', username=username) }}" method="POST">
+            <label>Username:</label>
+            <input type="text" name="username" value="{{ username }}" required>
+            
+            <label>Email:</label>
+            <input type="email" name="email" value="{{ email }}" required>
+            
+            <button type="submit">Save Changes</button>
+            <button type="button" onclick="closeEditInfoModal()" style="background: #ddd; margin-left: 10px;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDeleteModal()">&times;</span>
+        <h3>⚠️ Delete Account</h3>
+        <p style="color: #ff6666; font-weight: bold;">Warning: This action cannot be undone!</p>
+        <p>All your journals, reminders, and data will be permanently deleted.</p>
+        <form action="{{ url_for('delete_account', username=username) }}" method="POST">
+            <label>Enter your password to confirm:</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+            
+            <button type="submit" class="danger-btn">Yes, Delete My Account</button>
+            <button type="button" onclick="closeDeleteModal()" style="background: #ddd; margin-left: 10px;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Edit Info Modal
+function openEditInfoModal() {
+    document.getElementById('editInfoModal').style.display = 'block';
+}
+
+function closeEditInfoModal() {
+    document.getElementById('editInfoModal').style.display = 'none';
+}
+
+// Delete Account Modal
+function openDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'block';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    let editModal = document.getElementById('editInfoModal');
+    let deleteModal = document.getElementById('deleteModal');
+    if (event.target == editModal) {
+        closeEditInfoModal();
+    }
+    if (event.target == deleteModal) {
+        closeDeleteModal();
+    }
+}
+</script>
+
+</body>
+</html>
