@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f7f3ee; padding: 20px; }
+        h2 { color: #4e3b2c; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        a { color: #4e3b2c; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h2>Search Results</h2>
+    <ul>
+        {% if results %}
+            {% for j in results %}
+                <li>{{ j }}</li>
+            {% endfor %}
+        {% else %}
+            <li>No results found.</li>
+        {% endif %}
+    </ul>
+    <p><a href="{{ url_for('dashboard', username=username) }}">Back to Dashboard</a></p>
+</body>
+</html>
